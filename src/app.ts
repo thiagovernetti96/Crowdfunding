@@ -77,12 +77,11 @@ AppDataSource.initialize().then(async () => {
     const loginController = new LoginController(loginService);
     //Midleware TokenMiddleware
     const tokenMiddleware = new TokenMiddleware(loginService)
-    //Rotas
-    console.log("Controller pessoa fisica:", pessoaFisicaController);    
+    //Rotas    
     app.use('/api/pessoafisica',PessoaFisicaRouter(pessoaFisicaController))
     app.use('/api/pessoajuridica',PessoaJuridicaRouter(pessoaJuridicaController))
-    //app.post('/api/login', (req, res) => loginController.realizarLogin(req, res));
-    //app.use(tokenMiddleware.verificarAcesso.bind(tokenMiddleware));
+    app.post('/api/login', (req, res) => loginController.realizarLogin(req, res));
+    app.use(tokenMiddleware.verificarAcesso.bind(tokenMiddleware));
     app.use('/api/categoria',CategoriaRouter(categoriaController))
     app.use('/api/produto',ProdutoRouter(produtoController))
     app.use('/api/recompensa',RecompensaRouter(recompensaController))
