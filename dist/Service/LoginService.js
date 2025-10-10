@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LoginService = void 0;
-const pessoa_fisica_1 = require("../Model/pessoa_fisica");
 const jsonwebtoken_1 = require("jsonwebtoken");
 const SECRET = "Sen@c2025";
 class LoginService {
@@ -9,35 +8,28 @@ class LoginService {
         this.repository = repository;
     }
     async verificarLogin(email, senha) {
-        const usuario = await this.repository.findOne({
-            where: { email }
-        });
-        if (usuario && usuario.senha === senha) {
-            const tipo = usuario instanceof pessoa_fisica_1.PessoaFisica ? 'fisica' : 'juridica';
-            const token = (0, jsonwebtoken_1.sign)({
+        let usuario = await this.repository.findOneBy({ email: email });
+        if (usuario && usuario.senha == senha) {
+            let token = (0, jsonwebtoken_1.sign)({
                 usuarioId: usuario.id,
-                usuarioEmail: usuario.email,
-                tipoUsuario: tipo
+                usuarioEmail: usuario.email
             }, SECRET, { expiresIn: '1h' });
             return token;
         }
-        throw ({ id: 401, msg: "Usuário ou senha inválidos" });
+        throw ({ id: 401, msg: "Usuario ou senha invalidos" });
     }
     async validarToken(token) {
         try {
+            console.log("Token ", token);
             const payload = (0, jsonwebtoken_1.verify)(token, SECRET);
-            if (!payload || !payload.usuarioId) {
-                throw ({ id: 401, msg: "Token Inválido" });
+            if (!payload) {
+                throw ({ id: 401, msg: "Token Invalido" });
             }
-            return {
-                id: payload.usuarioId,
-                email: payload.usuarioEmail,
-                tipo: payload.tipoUsuario
-            };
+            return;
         }
         catch (err) {
             console.log(err);
-            throw ({ id: 401, msg: "Token Inválido" });
+            throw ({ id: 401, msg: "Token Invalido" });
         }
     }
 }

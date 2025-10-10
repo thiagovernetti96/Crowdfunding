@@ -1,7 +1,5 @@
 import { DataSource } from 'typeorm';
 import { Categoria } from './Model/categoria';
-import { PessoaFisica } from './Model/pessoa_fisica';
-import { PessoaJuridica } from './Model/pessoa_juridica';
 import { Produto } from './Model/produto';
 import { Recompensa } from './Model/recompensa';
 import {Usuario} from './Model/usuario';
@@ -16,7 +14,7 @@ export const AppDataSource = new DataSource({
   database: 'crowdfunding',
   synchronize: true,
   logging:true,
-  entities: [Categoria,PessoaFisica,PessoaJuridica,Produto,Recompensa,Usuario,Apoio],
+  entities: [Categoria,Produto,Recompensa,Usuario,Apoio],
   migrations: [],
   subscribers: [],
   

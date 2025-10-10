@@ -9,16 +9,14 @@ const API_KEY = process.env.ABACATEPAY_API_KEY || "abc_dev_snktBFqSMmahNKNQBdCaU
 export class ApoioService {
  static async criarApoio(data: {
     produto: number;
-    apoiadorPessoaFisica?: number;
-    apoiadorPessoaJuridica?: number;
+    apoiador: number;
     recompensa?: number;
     valor: number;
   }) {
     //Cria um apoio com pix temporário
     const apoio = new Apoio();
     apoio.produtoId = data.produto;
-    apoio.apoiadorPessoaFisicaId = data.apoiadorPessoaFisica || undefined;
-    apoio.apoiadorPessoaJuridicaId = data.apoiadorPessoaJuridica || undefined;
+    apoio.apoiadorId = data.apoiador
     apoio.recompensaId = data.recompensa || undefined;
     apoio.valor = data.valor;
     apoio.status = "PENDING";

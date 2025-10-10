@@ -5,16 +5,10 @@ import { CategoriaRepository } from "./Repository/CategoriaRepository";
 import { CategoriaService } from "./Service/CategoriaService";
 import { CategoriaController } from "./Controller/CategoriaController";
 import {CategoriaRouter} from "./Routes/CategoriaRouter"
-import { PessoaFisica } from "./Model/pessoa_fisica";
-import { PessoaFisicaRepository } from "./Repository/PessoaFisicaRepository";
-import { PessoaFisicaService } from "./Service/PessoaFisicaService";
-import { PessoaFisicaController } from "./Controller/PessoaFisicaController";
-import { PessoaFisicaRouter } from "./Routes/PessoaFisicaRouter";
-import { PessoaJuridica } from "./Model/pessoa_juridica";
-import {PessoaJuridicaRepository} from "./Repository/PessoaJuridicaRepository"
-import {PessoaJuridicaService} from "./Service/PessoaJuridicaService"
-import {PessoaJuridicaController} from "./Controller/PessoaJuridicaController"
-import {PessoaJuridicaRouter} from "./Routes/PessoaJuridicaRouter"
+import { UsuarioRepository } from "./Repository/UsuarioRepository";
+import { UsuarioService } from "./Service/UsuarioService";
+import { UsuarioController } from "./Controller/UsuarioController";
+import { UsuarioRouter } from "./Routes/UsuarioRouter";
 import { Produto } from "./Model/produto";
 import { ProdutoRepository } from "./Repository/ProdutoRepository";
 import { ProdutoService } from "./Service/ProdutoService";
@@ -35,7 +29,6 @@ import {LoginController} from "./Controller/LoginController";
 import {TokenMiddleware} from "./Middleware/TokenMiddleware";
 import "reflect-metadata";
 import { AppDataSource } from './data-source';
-import { TestRouter } from "./Routes/TestRouter";
 
 AppDataSource.initialize().then(async () => {
     const app = express();
@@ -52,13 +45,11 @@ AppDataSource.initialize().then(async () => {
     const categoriaService = new CategoriaService(CategoriaRepository);
     const categoriaController = new CategoriaController(categoriaService);
     //Pessoa Fisica
-    const PessoaFisicaRepository = AppDataSource.getRepository(PessoaFisica);
-    const pessoFisicaService = new PessoaFisicaService(PessoaFisicaRepository);
-    const pessoaFisicaController = new PessoaFisicaController(pessoFisicaService);
+    const UsuarioRepository = AppDataSource.getRepository(Usuario);
+    const usuarioService = new UsuarioService(UsuarioRepository);
+    const usuarioController = new UsuarioController(usuarioService);
     //Pessoa Juridica
-    const PessoaJuridicaRepository = AppDataSource.getRepository(PessoaJuridica);
-    const pessoJuridicaService = new PessoaJuridicaService(PessoaJuridicaRepository);
-    const pessoaJuridicaController = new PessoaJuridicaController(pessoJuridicaService);
+
     //Produto
     const ProdutoRepository = AppDataSource.getRepository(Produto);
     const produtoService = new ProdutoService(ProdutoRepository);
@@ -78,15 +69,13 @@ AppDataSource.initialize().then(async () => {
     //Midleware TokenMiddleware
     const tokenMiddleware = new TokenMiddleware(loginService)
     //Rotas    
-    app.use('/api/pessoafisica',PessoaFisicaRouter(pessoaFisicaController))
-    app.use('/api/pessoajuridica',PessoaJuridicaRouter(pessoaJuridicaController))
+    app.use('/api/usuario',UsuarioRouter(usuarioController))
     app.post('/api/login', (req, res) => loginController.realizarLogin(req, res));
     app.use(tokenMiddleware.verificarAcesso.bind(tokenMiddleware));
     app.use('/api/categoria',CategoriaRouter(categoriaController))
     app.use('/api/produto',ProdutoRouter(produtoController))
     app.use('/api/recompensa',RecompensaRouter(recompensaController))
     app.use('/api/apoio',ApoioRouter(apoioController))
-    app.use('/api/teste', TestRouter);
     
 
 

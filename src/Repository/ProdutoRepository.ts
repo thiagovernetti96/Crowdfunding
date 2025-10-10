@@ -11,8 +11,7 @@ export class ProdutoRepository{
       nome:produto.nome,
       descricao:produto.descricao,
       valor_meta:produto.valor_meta,
-      criadorPessoaFisica:produto.criadorPessoaFisica,
-      criadorPessoaJuridica:produto.criadorPessoaJuridica,
+      criador:produto.criador,
       categoria:produto.categoria,
       imagem_capa:produto.imagem_capa||'',
       valor_arrecadad0o:produto.valor_arrecadado||0

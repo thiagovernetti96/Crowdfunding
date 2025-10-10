@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { PessoaFisicaController } from "../Controller/PessoaFisicaController";
+import { UsuarioController } from "../Controller/UsuarioController";
 
-export const PessoaFisicaRouter = (controller:PessoaFisicaController): Router =>{
+export const UsuarioRouter = (controller:UsuarioController): Router =>{
   const router = Router();
   router.get('/', (req, res) => controller.listar(req,res));
   router.get('/:id', (req, res) => controller.buscarporId(req, res));

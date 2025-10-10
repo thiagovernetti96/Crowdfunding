@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const globals_1 = require("@jest/globals");
-const PessoaFisicaService_1 = require("../../Service/PessoaFisicaService");
+const UsuarioService_1 = require("../../Service/UsuarioService");
 const mockPessoaFisicaRepository = {
     save: globals_1.jest.fn(),
     find: globals_1.jest.fn(),
@@ -13,7 +13,7 @@ const mockPessoaFisicaRepository = {
     let pessoaFisicaRepository;
     (0, globals_1.beforeEach)(() => {
         pessoaFisicaRepository = mockPessoaFisicaRepository;
-        pessoaFisicaService = new PessoaFisicaService_1.PessoaFisicaService(pessoaFisicaRepository);
+        pessoaFisicaService = new UsuarioService_1.PessoaFisicaService(pessoaFisicaRepository);
         globals_1.jest.clearAllMocks();
     });
     (0, globals_1.describe)('inserir', () => {

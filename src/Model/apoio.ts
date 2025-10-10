@@ -2,8 +2,6 @@ import {Column,Entity,PrimaryGeneratedColumn,ManyToOne,JoinColumn,CreateDateColu
 import { Usuario } from "./usuario"
 import { Produto } from "./produto"
 import { Recompensa } from "./recompensa"
-import { PessoaFisica } from "./pessoa_fisica"
-import { PessoaJuridica } from "./pessoa_juridica"
 
 @Entity()
 export class Apoio {
@@ -23,11 +21,9 @@ export class Apoio {
   @CreateDateColumn({ type: 'timestamp' })
   data_apoio?: Date
 
-  @Column({ nullable: true })
-  apoiadorPessoaFisicaId?: number|null
+  @Column()
+  apoiadorId?: number
 
-  @Column({ nullable: true })
-  apoiadorPessoaJuridicaId?: number|null
 
   @Column()
   produtoId?: number
@@ -35,13 +31,9 @@ export class Apoio {
   @Column({ nullable: true })
   recompensaId?: number|null
 
-  @ManyToOne(() => PessoaFisica, { eager: false,nullable: true })
-  @JoinColumn({ name: "apoiadorPessoaFisicaId" })
-  apoiadorPessoaFisica?: PessoaFisica
-
-  @ManyToOne(() => PessoaJuridica, { eager: false,nullable: true })
-  @JoinColumn({ name: "apoiadorPessoaJuridicaId" })
-  apoiadorPessoaJuridica?: PessoaJuridica
+  @ManyToOne(() => Usuario, { eager: false })
+  @JoinColumn({ name: "apoiadorId" })
+  apoiador?: Usuario
 
   @ManyToOne(() => Produto, { eager: false })
   @JoinColumn({ name: "produtoId" })

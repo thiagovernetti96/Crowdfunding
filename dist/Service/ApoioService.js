@@ -12,33 +12,19 @@ const API_URL = "https://api.abacatepay.com/v1";
 const API_KEY = process.env.ABACATEPAY_API_KEY || "abc_dev_snktBFqSMmahNKNQBdCaUJyX";
 class ApoioService {
     static async criarApoio(data) {
-        // Validações básicas
-        if (!data.produto) {
-            throw new Error("produto é obrigatório");
-        }
-        if (!data.valor || data.valor <= 0) {
-            throw new Error("Valor deve ser maior que zero");
-        }
-        if (!data.apoiadorPessoaFisica && !data.apoiadorPessoaJuridica) {
-            throw new Error("Deve haver um apoiador (pessoa física ou jurídica)");
-        }
-        if (data.apoiadorPessoaFisica && data.apoiadorPessoaJuridica) {
-            throw new Error("Apoio deve ser feito por pessoa física ou jurídica, não ambos.");
-        }
-        // Cria o apoio primeiro (sem o pixId)
+        //Cria um apoio com pix temporário
         const apoio = new apoio_1.Apoio();
-        apoio.produtoId = data.produtoId;
-        //apoio.apoiadorPessoaFisicaId = data.apoiadorPessoaFisica || null;
-        //apoio.apoiadorPessoaJuridicaId = data.apoiadorPessoaJuridica || null;
-        //apoio.recompensa = data.recompensa || null;
+        apoio.produtoId = data.produto;
+        apoio.apoiadorId = data.apoiador;
+        apoio.recompensaId = data.recompensa || undefined;
         apoio.valor = data.valor;
         apoio.status = "PENDING";
-        // Salva o apoio para obter o ID
+        apoio.pixId = "temp_" + Date.now();
         const apoioSalvo = await ApoioRepository_1.ApoioRepository.save(apoio);
         try {
             // Cria o PIX
             const response = await axios_1.default.post(`${API_URL}/pixQrCode/create`, {
-                amount: Math.round(data.valor * 100), // em centavos
+                amount: Math.round(data.valor * 100),
                 description: `Apoio ao produto ${data.produto}`,
                 expiresIn: 3600,
                 metadata: { apoioId: apoioSalvo.id },
@@ -49,7 +35,7 @@ class ApoioService {
                 },
             });
             const pixData = response.data.data;
-            // Atualiza apoio com infos do Pix
+            // Atualiza apoio com o pixId real
             apoioSalvo.pixId = pixData.id;
             apoioSalvo.status = pixData.status;
             // Salva novamente com as informações do PIX

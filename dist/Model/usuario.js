@@ -31,6 +31,5 @@ __decorate([
     __metadata("design:type", String)
 ], Usuario.prototype, "senha", void 0);
 exports.Usuario = Usuario = __decorate([
-    (0, typeorm_1.Entity)(),
-    (0, typeorm_1.TableInheritance)({ column: { type: "varchar", name: "tipo" } })
+    (0, typeorm_1.Entity)()
 ], Usuario);

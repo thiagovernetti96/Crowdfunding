@@ -1,8 +1,7 @@
 import{Column,Entity,PrimaryGeneratedColumn,ManyToOne, AfterLoad } from "typeorm"
 import { Categoria } from "./categoria"
-import { PessoaFisica } from "./pessoa_fisica"
-import { PessoaJuridica } from "./pessoa_juridica"
 import { Apoio } from "./apoio"
+import { Usuario } from "./usuario"
 
 @Entity()
 export class Produto{
@@ -21,11 +20,8 @@ export class Produto{
   @ManyToOne(()=>Categoria,{eager:false})
   categoria?:Categoria
 
-  @ManyToOne(() => PessoaFisica, { eager: true, nullable: true })
-  criadorPessoaFisica?: PessoaFisica
-
-  @ManyToOne(() => PessoaJuridica, { eager: true, nullable: true })
-  criadorPessoaJuridica?: PessoaJuridica
+  @ManyToOne(() => Usuario, { eager: true, nullable: true })
+  criador?: Usuario
 
   @Column({ nullable: true })
   imagem_capa?:string

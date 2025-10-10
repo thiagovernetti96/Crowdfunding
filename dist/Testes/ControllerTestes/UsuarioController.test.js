@@ -112,7 +112,7 @@ const mockRequest = (body, params) => {
             const usuarioMock = { id: 1, nome: 'João Atualizado' };
             usuarioService.atualizar.mockResolvedValue(usuarioMock);
             await usuarioController.atualizar(req, res);
-            (0, globals_1.expect)(usuarioService.atualizar).toHaveBeenCalledWith(1, { nome: 'João Atualizado', cpf: '123.456.789-00' });
+            (0, globals_1.expect)(usuarioService.atualizar).toHaveBeenCalledWith(1, { nome: 'João Atualizado' });
             (0, globals_1.expect)(res.status).toHaveBeenCalledWith(200);
             (0, globals_1.expect)(res.json).toHaveBeenCalledWith(usuarioMock);
         });

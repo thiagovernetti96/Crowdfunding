@@ -6,13 +6,24 @@ class ProdutoService {
         this.produtoRepository = produtoRepository;
     }
     async inserir(produto) {
-        if (!produto.nome || !produto.descricao || !produto.categoria || !produto.criadorPessoaFisica && !produto.criadorPessoaJuridica
+        if (!produto.nome || !produto.descricao || !produto.categoria || !produto.criador
             || !produto.valor_meta) {
             throw ({ id: 400, msg: "Nome,descrição,categoria,criador e valor meta são obrigatórios" });
         }
         else {
             return await this.produtoRepository.save(produto);
         }
+    }
+    async getProductsWithTotalArrecadado() {
+        const query = `
+      SELECT 
+        p.*,
+        COALESCE(SUM(a.valor), 0) as valorArrecadado,
+      FROM product p
+      LEFT JOIN apoio a ON a."productId" = p.id
+      GROUP BY p.id
+    `;
+        return await this.produtoRepository.query(query);
     }
     async listar() {
         return this.produtoRepository.find();
@@ -38,8 +49,7 @@ class ProdutoService {
         }
         else {
             produtoexistente.categoria = produto.categoria;
-            produtoexistente.criadorPessoaFisica = produto.criadorPessoaFisica;
-            produtoexistente.criadorPessoaJuridica = produto.criadorPessoaJuridica;
+            produtoexistente.criador = produto.criador;
             produtoexistente.descricao = produto.descricao;
             produtoexistente.nome = produto.nome;
             produtoexistente.valor_meta = produto.valor_meta;

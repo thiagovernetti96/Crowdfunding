@@ -18,7 +18,7 @@ const produtoMockRepository = {
     });
     (0, globals_1.describe)('inserir', () => {
         (0, globals_1.it)('deve inserir um produto com sucesso', async () => {
-            const produto = { id: 1, nome: 'Produto A', descricao: 'Descrição do Produto A', valor_meta: 100.0, categoria: { id: 1 }, criadorPessoaFisica: { id: 1 } };
+            const produto = { id: 1, nome: 'Produto A', descricao: 'Descrição do Produto A', valor_meta: 100.0, categoria: { id: 1 }, criador: { id: 1 } };
             produtoMockRepository.save.mockReturnValueOnce(produto);
             const result = await produtoService.inserir(produto);
             (0, globals_1.expect)(result).toEqual(produto);
@@ -74,7 +74,7 @@ const produtoMockRepository = {
     });
     (0, globals_1.describe)('deletar', () => {
         (0, globals_1.it)('deve deletar um produto existente', async () => {
-            const produto_existente = { id: 1, nome: 'Produto A', descricao: 'Descrição do Produto A', valor_meta: 100.0, categoria: { id: 1 }, criadorPessoaJuridica: { id: 1 } };
+            const produto_existente = { id: 1, nome: 'Produto A', descricao: 'Descrição do Produto A', valor_meta: 100.0, categoria: { id: 1 }, criador: { id: 1 } };
             produtoMockRepository.findOne.mockReturnValueOnce(produto_existente);
             const result = await produtoService.deletar(1);
             (0, globals_1.expect)(result).toEqual(produto_existente);

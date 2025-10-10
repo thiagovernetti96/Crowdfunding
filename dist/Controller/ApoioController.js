@@ -5,8 +5,8 @@ const ApoioService_1 = require("../Service/ApoioService");
 class ApoioController {
     async criar(req, res) {
         try {
-            const { produto, apoiadorPessoaFisica, apoiadorPessoaJuridica, recompensa, valor } = req.body;
-            const result = await ApoioService_1.ApoioService.criarApoio({ produto, apoiadorPessoaFisica, apoiadorPessoaJuridica, recompensa, valor });
+            const { produto, apoiador, recompensa, valor } = req.body;
+            const result = await ApoioService_1.ApoioService.criarApoio({ produto, apoiador, recompensa, valor });
             res.status(201).json(result);
         }
         catch (err) {

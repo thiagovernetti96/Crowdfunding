@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import {describe, expect,it,beforeEach,jest} from '@jest/globals';
-import { PessoaFisicaService } from "../../Service/PessoaFisicaService";
-import { PessoaFisicaController } from "../../Controller/PessoaFisicaController";
+import { UsuarioService } from "../../Service/UsuarioService";
+import { UsuarioController } from '../../Controller/UsuarioController';
 
-const mockPessoaFisicaService = {
+const mockUsuarioService = {
   inserir: jest.fn(),
   listar: jest.fn(),
   buscarporId: jest.fn(),
@@ -31,32 +31,32 @@ const mockRequest = (body?: any, params?: any) => {
   } as Request;
 };
 
-describe('PessoaFisicaController', () => {
-  let pessoaFisicaController: PessoaFisicaController;
-  let pessoaFisicaService: jest.Mocked<PessoaFisicaService>;
+describe('UsuarioController', () => {
+  let usuarioController: UsuarioController;
+  let usuarioService: jest.Mocked<UsuarioService>;
   let res: Response;
 
   beforeEach(() => {
-    pessoaFisicaService = mockPessoaFisicaService as unknown as jest.Mocked<PessoaFisicaService>;
-    pessoaFisicaController = new PessoaFisicaController(pessoaFisicaService);
+    usuarioService = mockUsuarioService as unknown as jest.Mocked<UsuarioService>;
+    usuarioController = new  UsuarioController(usuarioService);
     res = mockResponse();
   });
   describe('inserir', () => {
     it('deve inserir pessoa fisica com sucesso e retornar status 201', async () => {
-      const req = mockRequest({ nome: 'João Silva', cpf: '123.456.789-00' });
-      const pessoaFisicaMock = { id: 1, nome: 'João Silva', cpf: '123.456.789-00' };
-      pessoaFisicaService.inserir.mockResolvedValue(pessoaFisicaMock);
-      await pessoaFisicaController.inserir(req, res);
-      expect(pessoaFisicaService.inserir).toHaveBeenCalledWith({ nome: 'João Silva', cpf: '123.456.789-00' });
+      const req = mockRequest({ nome: 'João Silva' });
+      const usuarioMock = { id: 1, nome: 'João Silva'};
+      usuarioService.inserir.mockResolvedValue(usuarioMock);
+      await usuarioController.inserir(req, res);
+      expect(usuarioService.inserir).toHaveBeenCalledWith({ nome: 'João Silva' });
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith(pessoaFisicaMock);
+      expect(res.json).toHaveBeenCalledWith(usuarioMock);
     });
     it('deve tratar erro ao inserir pessoa fisica e retornar status 400', async () => {
       const req = mockRequest({ nome: '', cpf: 'invalid-cpf' });
       const errorMock: MockError = { id: 1, msg: 'Dados inválidos' };
-      pessoaFisicaService.inserir.mockRejectedValue(errorMock);
-      await pessoaFisicaController.inserir(req, res);
-      expect(pessoaFisicaService.inserir).toHaveBeenCalledWith({ nome: '', cpf: 'invalid-cpf' });
+      usuarioService.inserir.mockRejectedValue(errorMock);
+      await usuarioController.inserir(req, res);
+      expect(usuarioService.inserir).toHaveBeenCalledWith({ nome: '' });
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith(errorMock);
     });
@@ -66,12 +66,12 @@ describe('PessoaFisicaController', () => {
     it('deve listar todas as pessoas fisicas e retornar status 200', async () => {
       const req = mockRequest();
       const pessoasFisicasMock = [
-        { id: 1, nome: 'João Silva', cpf: '123.456.789-00' },
-        { id: 2, nome: 'Maria Souza', cpf: '987.654.321-00' }
+        { id: 1, nome: 'João Silva' },
+        { id: 2, nome: 'Maria Souza'}
       ];
-      pessoaFisicaService.listar.mockResolvedValue(pessoasFisicasMock);
-      await pessoaFisicaController.listar(req, res);
-      expect(pessoaFisicaService.listar).toHaveBeenCalled();
+      usuarioService.listar.mockResolvedValue(pessoasFisicasMock);
+      await usuarioController.listar(req, res);
+      expect(usuarioService.listar).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(pessoasFisicasMock);
     });
@@ -79,19 +79,19 @@ describe('PessoaFisicaController', () => {
   describe('buscarporId', () => {
     it('deve buscar pessoa fisica por id e retornar status 200', async () => {
       const req = mockRequest(undefined, { id: '1' });
-      const pessoaFisicaMock = { id: 1, nome: 'João Silva', cpf: '123.456.789-00' };
-      pessoaFisicaService.buscarporId.mockResolvedValue(pessoaFisicaMock);
-      await pessoaFisicaController.buscarporId(req, res);
-      expect(pessoaFisicaService.buscarporId).toHaveBeenCalledWith(1);
+      const usuarioMock = { id: 1, nome: 'João Silva' };
+      usuarioService.buscarporId.mockResolvedValue(usuarioMock);
+      await usuarioController.buscarporId(req, res);
+      expect(usuarioService.buscarporId).toHaveBeenCalledWith(1);
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(pessoaFisicaMock);
+      expect(res.json).toHaveBeenCalledWith(usuarioMock);
     });
     it('deve tratar erro ao buscar pessoa fisica por id e retornar status 404', async () => {
       const req = mockRequest(undefined, { id: '999' });
       const errorMock: MockError = { id: 404, msg: 'Pessoa física não encontrada' };
-      pessoaFisicaService.buscarporId.mockRejectedValue(errorMock);
-      await pessoaFisicaController.buscarporId(req, res);
-      expect(pessoaFisicaService.buscarporId).toHaveBeenCalledWith(999);
+      usuarioService.buscarporId.mockRejectedValue(errorMock);
+      await usuarioController.buscarporId(req, res);
+      expect(usuarioService.buscarporId).toHaveBeenCalledWith(999);
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith(errorMock);
     });
@@ -99,39 +99,39 @@ describe('PessoaFisicaController', () => {
   describe('buscarporNome', () => {
     it('deve buscar pessoas fisicas por nome e retornar status 200', async () => {
       const req = mockRequest({}, { nome: 'João' });
-      const pessoaFisicaMock  = { id: 1, nome: 'João', cpf: '123.456.789-00' };
-      pessoaFisicaService.buscarporNome.mockResolvedValue(pessoaFisicaMock);
-      await pessoaFisicaController.buscarporNome(req, res);
-      expect(pessoaFisicaService.buscarporNome).toHaveBeenCalledWith('João');
+      const usuarioMock  = { id: 1, nome: 'João'};
+      usuarioService.buscarporNome.mockResolvedValue(usuarioMock);
+      await usuarioController.buscarporNome(req, res);
+      expect(usuarioService.buscarporNome).toHaveBeenCalledWith('João');
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith([pessoaFisicaMock]);
+      expect(res.json).toHaveBeenCalledWith([usuarioMock]);
     });
     it('deve tratar erro ao buscar pessoas fisicas por nome e retornar status 500', async () => {
       const req = mockRequest(undefined, { nome: 'João' });
       const errorMock: MockError = { id: 500, msg: 'Erro interno' };
-      pessoaFisicaService.buscarporNome.mockRejectedValue(errorMock);
-      await pessoaFisicaController.buscarporNome(req, res);
-      expect(pessoaFisicaService.buscarporNome).toHaveBeenCalledWith('João');
+      usuarioService.buscarporNome.mockRejectedValue(errorMock);
+      await usuarioController.buscarporNome(req, res);
+      expect(usuarioService.buscarporNome).toHaveBeenCalledWith('João');
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ message: 'Erro interno' });
     });
   });
   describe('atualizar', () => {
     it('deve atualizar pessoa fisica com sucesso e retornar status 200', async () => {
-      const req = mockRequest({ nome: 'João Atualizado', cpf: '123.456.789-00' }, { id: '1' });
-      const pessoaFisicaMock = { id: 1, nome: 'João Atualizado', cpf: '123.456.789-00' };
-      pessoaFisicaService.atualizar.mockResolvedValue(pessoaFisicaMock);
-      await pessoaFisicaController.atualizar(req, res);
-      expect(pessoaFisicaService.atualizar).toHaveBeenCalledWith(1, { nome: 'João Atualizado', cpf: '123.456.789-00' });
+      const req = mockRequest({ nome: 'João Atualizado' }, { id: '1' });
+      const usuarioMock = { id: 1, nome: 'João Atualizado' };
+     usuarioService.atualizar.mockResolvedValue(usuarioMock);
+      await usuarioController.atualizar(req, res);
+      expect(usuarioService.atualizar).toHaveBeenCalledWith(1, { nome: 'João Atualizado'});
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(pessoaFisicaMock);
+      expect(res.json).toHaveBeenCalledWith(usuarioMock);
     });
     it('deve tratar erro ao atualizar pessoa fisica e retornar status 400', async () => {
       const req = mockRequest({ nome: '', cpf: 'invalid-cpf' }, { id: '1' });
       const errorMock: MockError = { id: 400, msg: 'Dados inválidos' };
-      pessoaFisicaService.atualizar.mockRejectedValue(errorMock);
-      await pessoaFisicaController.atualizar(req, res);
-      expect(pessoaFisicaService.atualizar).toHaveBeenCalledWith(1, { nome: '', cpf: 'invalid-cpf' });
+     usuarioService.atualizar.mockRejectedValue(errorMock);
+      await usuarioController.atualizar(req, res);
+      expect(usuarioService.atualizar).toHaveBeenCalledWith(1, { nome: '' });
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith(errorMock);
     });
@@ -139,18 +139,18 @@ describe('PessoaFisicaController', () => {
   describe('deletar', () => {
     it('deve deletar pessoa fisica com sucesso e retornar status 204', async () => {
       const req = mockRequest(undefined, { id: '1' });
-      pessoaFisicaService.deletar.mockResolvedValue(undefined);
-      await pessoaFisicaController.deletar(req, res);
-      expect(pessoaFisicaService.deletar).toHaveBeenCalledWith(1);
+     usuarioService.deletar.mockResolvedValue(undefined);
+      await usuarioController.deletar(req, res);
+      expect(usuarioService.deletar).toHaveBeenCalledWith(1);
       expect(res.status).toHaveBeenCalledWith(204);
       expect(res.json).not.toHaveBeenCalled();
     });
     it('deve tratar erro ao deletar pessoa fisica e retornar status 404', async () => {
       const req = mockRequest(undefined, { id: '999' });
       const errorMock: MockError = { id: 404, msg: 'Pessoa física não encontrada' };
-      pessoaFisicaService.deletar.mockRejectedValue(errorMock);
-      await pessoaFisicaController.deletar(req, res);
-      expect(pessoaFisicaService.deletar).toHaveBeenCalledWith(999);
+      usuarioService.deletar.mockRejectedValue(errorMock);
+      await usuarioController.deletar(req, res);
+      expect(usuarioService.deletar).toHaveBeenCalledWith(999);
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith(errorMock);
     });

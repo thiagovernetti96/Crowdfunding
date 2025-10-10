@@ -9,7 +9,7 @@ export class ProdutoService{
     this.produtoRepository = produtoRepository
   }
   async inserir(produto:Produto):Promise<Produto>{
-    if(!produto.nome||!produto.descricao||!produto.categoria||!produto.criadorPessoaFisica&&!produto.criadorPessoaJuridica
+    if(!produto.nome||!produto.descricao||!produto.categoria||!produto.criador
       ||!produto.valor_meta){
       throw({id:400,msg:"Nome,descrição,categoria,criador e valor meta são obrigatórios"});      
     }else{
@@ -58,8 +58,7 @@ export class ProdutoService{
     }
     else{
       produtoexistente.categoria = produto.categoria;
-      produtoexistente.criadorPessoaFisica = produto.criadorPessoaFisica;
-      produtoexistente.criadorPessoaJuridica = produto.criadorPessoaJuridica;
+      produtoexistente.criador = produto.criador
       produtoexistente.descricao = produto.descricao;
       produtoexistente.nome = produto.nome;
       produtoexistente.valor_meta = produto.valor_meta;

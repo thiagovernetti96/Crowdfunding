@@ -1,9 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn,TableInheritance } from "typeorm"
+import { Column, Entity, PrimaryGeneratedColumn} from "typeorm"
 
 @Entity()
-@TableInheritance({ column: { type: "varchar", name: "tipo" } })
+
 export abstract class Usuario {
- 
     @PrimaryGeneratedColumn()
     id?: number
     @Column()

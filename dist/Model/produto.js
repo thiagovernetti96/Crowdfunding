@@ -12,8 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Produto = void 0;
 const typeorm_1 = require("typeorm");
 const categoria_1 = require("./categoria");
-const pessoa_fisica_1 = require("./pessoa_fisica");
-const pessoa_juridica_1 = require("./pessoa_juridica");
+const usuario_1 = require("./usuario");
 let Produto = class Produto {
 };
 exports.Produto = Produto;
@@ -34,21 +33,13 @@ __decorate([
     __metadata("design:type", Number)
 ], Produto.prototype, "valor_meta", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", Number)
-], Produto.prototype, "valor_arrecadado", void 0);
-__decorate([
     (0, typeorm_1.ManyToOne)(() => categoria_1.Categoria, { eager: false }),
     __metadata("design:type", categoria_1.Categoria)
 ], Produto.prototype, "categoria", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => pessoa_fisica_1.PessoaFisica, { eager: true, nullable: true }),
-    __metadata("design:type", pessoa_fisica_1.PessoaFisica)
-], Produto.prototype, "criadorPessoaFisica", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(() => pessoa_juridica_1.PessoaJuridica, { eager: true, nullable: true }),
-    __metadata("design:type", pessoa_juridica_1.PessoaJuridica)
-], Produto.prototype, "criadorPessoaJuridica", void 0);
+    (0, typeorm_1.ManyToOne)(() => usuario_1.Usuario, { eager: true, nullable: true }),
+    __metadata("design:type", usuario_1.Usuario)
+], Produto.prototype, "criador", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
