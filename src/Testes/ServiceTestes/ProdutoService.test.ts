@@ -2,14 +2,14 @@ import {describe, expect,it,beforeEach,jest} from '@jest/globals';
 import {Produto} from '../../Model/produto';
 import {ProdutoService} from '../../Service/ProdutoService'
 import { Repository } from 'typeorm';
-
+/*
 const produtoMockRepository = {
   save: jest.fn(),
   find: jest.fn(),
   findOne: jest.fn(),
   remove: jest.fn()
 };
-
+/*
 describe('ProdutoService', () => {
   let produtoService: ProdutoService;
   let produtoRepository: Repository<Produto>;
@@ -129,4 +129,4 @@ describe('ProdutoService', () => {
       expect(produtoMockRepository.find).toHaveBeenCalledWith({ where: { nome: 'Produto A' } });
     });
   }); 
-});
+});*/

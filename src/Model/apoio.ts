@@ -28,8 +28,8 @@ export class Apoio {
   @Column()
   produtoId?: number
 
-  @Column({ nullable: true })
-  recompensaId?: number|null
+  //@Column({ nullable: true })
+  //recompensaId?: number|null
 
   @ManyToOne(() => Usuario, { eager: false })
   @JoinColumn({ name: "apoiadorId" })
@@ -39,8 +39,8 @@ export class Apoio {
   @JoinColumn({ name: "produtoId" })
   produto?: Produto
 
-  @ManyToOne(() => Recompensa, { eager: false, nullable: true })
-  @JoinColumn({ name: "recompensaId" })
+  //@ManyToOne(() => Recompensa, { eager: false, nullable: true })
+  //@JoinColumn({ name: "recompensaId" })
   recompensa?: Recompensa
 
 }

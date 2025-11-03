@@ -1,78 +1,152 @@
 import { ProdutoService } from "../Service/ProdutoService";
-import { Request,Response } from "express";
+import { Request, Response } from "express";
+import upload from "../Config/multer";
 
-export class ProdutoController{ 
-  private produtoService:ProdutoService;
-  constructor(produtoService:ProdutoService){
+export class ProdutoController { 
+  private produtoService: ProdutoService;
+  public uploadImage = upload.single('imagem_capa');
+
+  constructor(produtoService: ProdutoService) {
     this.produtoService = produtoService;
   }
 
-async inserir(req: Request, res: Response): Promise<void> {
-  try {
-    console.log("REQUEST BODY:", req.body);
-    const produto = req.body;
-    const newProduto = await this.produtoService.inserir(produto);
-    res.status(201).json(newProduto);
-  } catch (err: any) {
-    console.error("ERROR:", err);
-    const statusCode = err.id || 500;
-    res.status(statusCode).json({ 
-      message: err.msg || err.message || "Erro" 
-    });
-  }
-}
+  async inserir(req: Request, res: Response): Promise<void> {
+    try {
+      console.log("REQUEST BODY:", req.body);
+      console.log("FILE:", req.file);
 
-  async listar(req:Request,res:Response):Promise<void>{
-    try{
+      const { nome, descricao, valor_meta, categoriaId, criadorId } = req.body;
+      let imagemFilename: string | undefined = undefined;
+
+      if (req.file) {
+        imagemFilename = req.file.filename;
+      }
+
+      const produtoData: any = {
+        nome,
+        descricao,
+        valor_meta: parseFloat(valor_meta),
+        categoria: { id: parseInt(categoriaId) },
+        criador: { id: parseInt(criadorId) }
+      };
+
+      const newProduto = await this.produtoService.inserir(produtoData, imagemFilename);
+      res.status(201).json(newProduto);
+      
+    } catch (err: any) {
+      console.error("ERROR:", err);
+      const statusCode = err.id || 500;
+      res.status(statusCode).json({ 
+        message: err.msg || err.message || "Erro",
+        detalhes: err.detalhes || null
+      });
+    }
+  }
+
+  async atualizar(req: Request, res: Response): Promise<void> {
+    try {
+      const id = parseInt(req.params.id);
+      const { nome, descricao, valor_meta, categoriaId } = req.body;
+      let imagemFilename: string | undefined = undefined;
+
+      if (req.file) {
+        imagemFilename = req.file.filename;
+      }
+      const produtoData: any = {
+        nome,
+        descricao,
+        valor_meta: parseFloat(valor_meta),
+        categoria: { id: parseInt(categoriaId) }
+      };
+
+      const produtoAtualizado = await this.produtoService.atualizar(id, produtoData, imagemFilename);
+      res.status(200).json(produtoAtualizado);
+      
+    } catch (err: any) {
+      res.status(err.id).json({ message: err.msg });
+    }
+  }
+
+  async listar(req: Request, res: Response): Promise<void> {
+    try {
       const lista = await this.produtoService.listar();
       res.status(200).json(lista);
-    }
-    catch(err:any){
-      res.status(err.id).json({message:err.msg});
+    } catch (err: any) {
+      res.status(err.id).json({ message: err.msg });
     }
   }
 
-  async buscarporId(req:Request,res:Response):Promise<void>{
-    try{
+  async buscarporId(req: Request, res: Response): Promise<void> {
+    try {
       const id = parseInt(req.params.id);
       const busca = await this.produtoService.buscarporId(id);
-      res.status(201).json(busca);
-    }
-    catch(err:any){
-      res.status(err.id).json({message:err.msg});
+      res.status(200).json(busca);
+    } catch (err: any) {
+      res.status(err.id).json({ message: err.msg });
     }
   }
 
-  async buscarporNome(req:Request,res:Response):Promise<void>{
-    try{
+  async buscarporNome(req: Request, res: Response): Promise<void> {
+    try {
       const nome = req.params.nome;
       const busca = await this.produtoService.buscarporNome(nome);
-      res.status(201).json(busca);
-    }
-    catch(err:any){
-      res.status(err.id).json({message:err.msg});
+      res.status(200).json(busca);
+    } catch (err: any) {
+      res.status(err.id).json({ message: err.msg });
     }
   }
 
-  async atualizar(req:Request,res:Response):Promise<void>{
-    try{
-      const id = parseInt(req.params.id);
-      const produto = req.body;
-      const produtoAtualizado = await this.produtoService.atualizar(id,produto);
-      res.status(200).json(produtoAtualizado);
-    }
-    catch(err:any){
-      res.status(err.id).json({message:err.msg});
+  async buscarPorCriador(req: Request, res: Response): Promise<void> {
+    try {
+      const nomeCriador = req.params.nomeCriador;
+      const busca = await this.produtoService.buscarPorCriador(nomeCriador);
+      res.status(200).json(busca);
+    } catch (err: any) {
+      res.status(err.id).json({ message: err.msg });
     }
   }
-  async deletar(req:Request,res:Response):Promise<void>{
-    try{
+
+  async deletar(req: Request, res: Response): Promise<void> {
+    try {
       const id = parseInt(req.params.id);
       await this.produtoService.deletar(id);
       res.status(204).send();
+    } catch (err: any) {
+      res.status(err.id).json({ message: err.msg });
     }
-    catch(err:any){
-      res.status(err.id).json({message:err.msg});
+  }
+
+   async listarComArrecadacao(req: Request, res: Response) {
+    try {
+      const produtos = await this.produtoService.getProductsWithTotalArrecadado();
+      res.json(produtos);
+    } catch (error) {
+      res.status(500).json({ error: 'Erro ao buscar produtos' });
+    }
+  }
+
+  async obterPorIdComArrecadacao(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const produto = await this.produtoService.getProductWithTotalArrecadadoById(Number(id));
+      
+      if (!produto) {
+        return res.status(404).json({ error: 'Produto não encontrado' });
+      }
+      
+      res.json(produto);
+    } catch (error) {
+      res.status(500).json({ error: 'Erro ao buscar produto' });
+    }
+  }
+
+  async buscarPorCriadorComArrecadacao(req: Request, res: Response) {
+    try {
+      const { nome } = req.params;
+      const produtos = await this.produtoService.getProductsByCreatorWithTotalArrecadado(nome);
+      res.json(produtos);
+    } catch (error) {
+      res.status(500).json({ error: 'Erro ao buscar produtos do criador' });
     }
   }
 }

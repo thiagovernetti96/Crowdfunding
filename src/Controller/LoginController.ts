@@ -11,8 +11,8 @@ export class LoginController {
     realizarLogin = async (req: Request, res: Response): Promise<void> => {
       const { email, senha } = req.body;
       try{ 
-          const token = await this.service.verificarLogin(email, senha);
-          res.status(201).json({token: token});
+          const {token,nome} = await this.service.verificarLogin(email, senha);
+          res.status(201).json({token,nome});
       }
       catch(err:any) {
           res.status(err.id).json({ error: err.msg });

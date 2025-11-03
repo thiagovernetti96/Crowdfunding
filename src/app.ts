@@ -1,4 +1,6 @@
 import express,{Request,Response} from "express";
+import path from 'path';
+import 'dotenv/config';
 import { Usuario } from "./Model/usuario";
 import {Categoria} from "./Model/categoria";
 import { CategoriaRepository } from "./Repository/CategoriaRepository";
@@ -44,11 +46,10 @@ AppDataSource.initialize().then(async () => {
     const CategoriaRepository = AppDataSource.getRepository(Categoria);
     const categoriaService = new CategoriaService(CategoriaRepository);
     const categoriaController = new CategoriaController(categoriaService);
-    //Pessoa Fisica
+    //Pessoa  Usuário
     const UsuarioRepository = AppDataSource.getRepository(Usuario);
     const usuarioService = new UsuarioService(UsuarioRepository);
     const usuarioController = new UsuarioController(usuarioService);
-    //Pessoa Juridica
 
     //Produto
     const ProdutoRepository = AppDataSource.getRepository(Produto);
@@ -68,20 +69,30 @@ AppDataSource.initialize().then(async () => {
     const loginController = new LoginController(loginService);
     //Midleware TokenMiddleware
     const tokenMiddleware = new TokenMiddleware(loginService)
-    //Rotas    
-    app.use('/api/usuario',UsuarioRouter(usuarioController))
-    app.post('/api/login', (req, res) => loginController.realizarLogin(req, res));
-    app.use(tokenMiddleware.verificarAcesso.bind(tokenMiddleware));
-    app.use('/api/categoria',CategoriaRouter(categoriaController))
-    app.use('/api/produto',ProdutoRouter(produtoController))
-    app.use('/api/recompensa',RecompensaRouter(recompensaController))
-    app.use('/api/apoio',ApoioRouter(apoioController))
-    
+  // Rotas PÚBLICAS 
+  app.use('/uploads', express.static(path.join(__dirname, '../uploads')));    
+  app.use('/api/usuario', UsuarioRouter(usuarioController));
+  app.use('/api/categoria', CategoriaRouter(categoriaController));
+  app.use('/api/produto', ProdutoRouter(produtoController));
+  app.use('/api/recompensa', RecompensaRouter(recompensaController));
+  app.post('/api/login', (req, res) => loginController.realizarLogin(req, res));
+  // Adicionando isso temporariamente
+  //app.get('/api/test-api-key', (req, res) => {
+  //console.log("🔍 Todas as variáveis de ambiente:", process.env);
+  //console.log("🔍 API Key específica:", process.env.ABACATE_PAY_API_KEY);
+  
+  //res.json({ 
+    //apiKeyPresent: !!process.env.ABACATE_PAY_API_KEY,
+    //apiKeyValue: process.env.ABACATE_PAY_API_KEY || 'NÃO ENCONTRADA',
+    //allEnvKeys: Object.keys(process.env).filter(key => key.includes('ABACATE') || key.includes('API'))
+  //});
+//});
 
+  // Rotas PROTEGIDAS
+  app.use('/api/apoio', ApoioRouter(apoioController, tokenMiddleware));
 
-
-    app.listen(port, () => {
+  app.listen(port, () => {
     console.log(`Servidor rodando em http://localhost:${port}`);
-    })
+  });
 
 })

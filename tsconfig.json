@@ -11,6 +11,6 @@
       "emitDecoratorMetadata": true,
       "experimentalDecorators": true
     },
-    "include": ["src/**/*", "src/app.ts", "jest.config.js"],
+    "include": ["src/**/*", ".env", "src/app.ts", "jest.config.js"],
     "exclude": ["node_modules"],
 }

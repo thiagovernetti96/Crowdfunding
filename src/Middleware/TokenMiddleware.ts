@@ -10,6 +10,14 @@ export class TokenMiddleware{
 
     async verificarAcesso(req: Request, res: Response, next: NextFunction){
         let token = req.get("Token");
+        if (req.path.startsWith('/uploads/')) {
+        return next();
+    }
+    
+    if (req.path === '/api/login' || req.path.startsWith('/api/categoria')) {
+        return next();
+    }
+    
         if(!token) {
             res.status(401).json({error: "Nenhum token informado!"});
         }
