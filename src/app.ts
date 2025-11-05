@@ -39,7 +39,7 @@ AppDataSource.initialize().then(async () => {
     app.use(cors({
       origin:'*',
     }))
-    const PORT = process.env.PORT || 3000;
+    const PORT = Number(process.env.PORT) || 3000;
     app.use(express.json());
     //Inicializar Dependencias
     // Categoria
@@ -91,7 +91,7 @@ AppDataSource.initialize().then(async () => {
   // Rotas PROTEGIDAS
   app.use('/api/apoio', ApoioRouter(apoioController, tokenMiddleware));
 
-  app.listen(PORT, () => {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor rodando em http://localhost:${PORT}`);
   });
 
