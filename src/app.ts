@@ -29,8 +29,13 @@ import { ApoioRouter } from "./Routes/ApoioRouter";
 import { LoginService } from "./Service/LoginService";
 import {LoginController} from "./Controller/LoginController";
 import {TokenMiddleware} from "./Middleware/TokenMiddleware";
+console.log('🟢 APP.TS INICIADO - Carregando dependências...');
 import "reflect-metadata";
 import { AppDataSource } from './data-source';
+
+console.log('🟢 DataSource importado, tentando inicializar...');
+console.log('🔍 DATABASE_URL no app.ts:', process.env.DATABASE_URL ? 'PRESENTE' : 'AUSENTE');
+console.log('🔍 NODE_ENV no app.ts:', process.env.NODE_ENV);
 
 AppDataSource.initialize().then(async () => {
     const app = express();

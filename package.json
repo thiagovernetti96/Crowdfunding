@@ -9,7 +9,7 @@
     "test:Service": "jest src/Testes/ServiceTestes",
     "test:Controller": "jest src/Testes/ControllerTestes",
     "start": "node dist/app.js",
-    "build": "tsc"
+    "build": "tsc && echo '✅ Build completo' && ls -la dist/"
   },
   "author": "",
   "license": "ISC",
