@@ -1,3 +1,4 @@
+// data-source.ts
 import { DataSource } from 'typeorm';
 import { Categoria } from './Model/categoria';
 import { Produto } from './Model/produto';
@@ -5,43 +6,37 @@ import { Recompensa } from './Model/recompensa';
 import { Usuario } from './Model/usuario';
 import { Apoio } from './Model/apoio';
 
-// Configuração para desenvolvimento (local)
-const devConfig = {
-  type: 'postgres' as const,
-  host: 'localhost',
-  port: 5432,
-  username: 'postgres',
-  password: 'floripa96',
-  database: 'crowdfunding',
-  synchronize: true,
-  logging: true,
-  entities: [Categoria, Produto, Recompensa, Usuario, Apoio],
-  migrations: [],
-  subscribers: [],
-};
+console.log('=== DATABASE CONFIG ===');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
 
-// Configuração para produção (Render)
-const prodConfig = {
-  type: 'postgres' as const,
-  url: process.env.DATABASE_URL,
-  synchronize: false, 
-  logging: false,
-  entities: [Categoria, Produto, Recompensa, Usuario, Apoio],
-  migrations: [],
-  subscribers: [],
-  ssl: true,
-  extra: {
-    ssl: {
-      rejectUnauthorized: false
+// Use  a URL apenas quando em produção
+const config = process.env.DATABASE_URL 
+  ? {
+      type: 'postgres' as const,
+      url: process.env.DATABASE_URL,
+      entities: [Categoria, Produto, Recompensa, Usuario, Apoio],
+      synchronize: false,
+      logging: true,
+      ssl: true,
+      extra: {
+        ssl: {
+          rejectUnauthorized: false
+        }
+      }
     }
-  }
-};
+  : {
+      type: 'postgres' as const,
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: 'floripa96',
+      database: 'crowdfunding',
+      synchronize: true,
+      logging: true,
+      entities: [Categoria, Produto, Recompensa, Usuario, Apoio]
+    };
 
-// Escolhe a configuração baseada no ambiente
-const config = process.env.NODE_ENV === 'production' ? prodConfig : devConfig;
+console.log('Using config:', process.env.DATABASE_URL ? 'PRODUCTION' : 'DEVELOPMENT');
 
 export const AppDataSource = new DataSource(config);
-
-// Log para debug
-console.log('Ambiente:', process.env.NODE_ENV || 'development');
-console.log('Database:', process.env.NODE_ENV === 'production' ? 'Produção (Render)' : 'Desenvolvimento (Local)');
