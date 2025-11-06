@@ -9,7 +9,7 @@
     "test:Service": "jest src/Testes/ServiceTestes",
     "test:Controller": "jest src/Testes/ControllerTestes",
     "start": "node dist/app.js",
-    "build": "tsc "
+    "build": "tsc && echo '=== DEBUG BUILD ===' && pwd && find . -name '*multer*' -type f && echo '=== DIST FOLDER ===' && ls -la dist/ && echo '=== DIST/CONFIG ===' && ls -la dist/Config/ && echo '=== PRODUTOCONTROLLER IMPORT ===' && grep 'require.*multer' dist/Controller/ProdutoController.js"
   },
   "author": "",
   "license": "ISC",
