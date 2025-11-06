@@ -4,10 +4,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProdutoController = void 0;
-const multer_config_1 = __importDefault(require("../Config/multer.config"));
+const multer_1 = __importDefault(require("../Config/multer"));
 class ProdutoController {
     constructor(produtoService) {
-        this.uploadImage = multer_config_1.default.single('imagem_capa');
+        this.uploadImage = multer_1.default.single('imagem_capa');
         this.produtoService = produtoService;
     }
     async inserir(req, res) {
