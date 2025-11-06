@@ -8,7 +8,7 @@
     "test:Repository": "jest src/Testes/RepositoryTestes",
     "test:Service": "jest src/Testes/ServiceTestes",
     "test:Controller": "jest src/Testes/ControllerTestes",
-    "start": "node dist/app.js",
+    "start": "node -e \"console.log('📁 DIRETÓRIO ATUAL:', process.cwd()); console.log('📁 CONTEÚDO:'); require('fs').readdirSync('.').forEach(f => console.log('   -', f)); console.log('📁 CONTEÚDO dist/:'); require('fs').readdirSync('dist').forEach(f => console.log('   -', f)); console.log('📁 CONTEÚDO dist/Config/:'); require('fs').readdirSync('dist/Config').forEach(f => console.log('   -', f))\" && node dist/app.js",
     "build": "tsc "
   },
   "author": "",
