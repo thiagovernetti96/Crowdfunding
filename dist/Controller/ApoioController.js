@@ -5,8 +5,8 @@ const ApoioService_1 = require("../Service/ApoioService");
 class ApoioController {
     async criar(req, res) {
         try {
-            const { produto, apoiador, recompensa, valor } = req.body;
-            const result = await ApoioService_1.ApoioService.criarApoio({ produto, apoiador, recompensa, valor });
+            const { produto, apoiador, valor } = req.body;
+            const result = await ApoioService_1.ApoioService.criarApoio({ produto, apoiador, valor });
             res.status(201).json(result);
         }
         catch (err) {
@@ -20,6 +20,27 @@ class ApoioController {
             res.json(apoio);
         }
         catch (err) {
+            res.status(400).json({ error: err.message });
+        }
+    }
+    async simularPagamento(req, res) {
+        try {
+            const { id } = req.params;
+            const result = await ApoioService_1.ApoioService.simularPagamento(Number(id));
+            res.json(result);
+        }
+        catch (err) {
+            res.status(400).json({ error: err.message });
+        }
+    }
+    async webhook(req, res) {
+        try {
+            const webhookData = req.body;
+            const result = await ApoioService_1.ApoioService.processarWebhook(webhookData);
+            res.json(result);
+        }
+        catch (err) {
+            console.error("Erro no webhook:", err);
             res.status(400).json({ error: err.message });
         }
     }

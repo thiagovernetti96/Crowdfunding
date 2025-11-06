@@ -6,8 +6,8 @@ class LoginController {
         this.realizarLogin = async (req, res) => {
             const { email, senha } = req.body;
             try {
-                const token = await this.service.verificarLogin(email, senha);
-                res.status(201).json({ token: token });
+                const { token, nome } = await this.service.verificarLogin(email, senha);
+                res.status(201).json({ token, nome });
             }
             catch (err) {
                 res.status(err.id).json({ error: err.msg });

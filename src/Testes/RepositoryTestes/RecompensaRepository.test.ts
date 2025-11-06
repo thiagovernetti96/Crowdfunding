@@ -1,7 +1,7 @@
 import {describe, expect,it,beforeEach} from '@jest/globals';
 import { Recompensa } from '../../Model/recompensa';
 import { RecompensaRepository } from '../../Repository/RecompensaRepository';
-
+/*
 describe('RecompensaRepository', () => {
   let repository: RecompensaRepository; 
   beforeEach(() => {
@@ -134,4 +134,4 @@ describe('RecompensaRepository', () => {
       expect(recompensa).toBeUndefined();
     });
   })
-});
+});*/

@@ -1,4 +1,4 @@
-
+// data-source.ts
 import { DataSource } from 'typeorm';
 import { Categoria } from './Model/categoria';
 import { Produto } from './Model/produto';
@@ -6,27 +6,12 @@ import { Recompensa } from './Model/recompensa';
 import { Usuario } from './Model/usuario';
 import { Apoio } from './Model/apoio';
 
-console.log('🔴 DATA-SOURCE CARREGADO!');
-console.log('DATABASE_URL:', process.env.DATABASE_URL);
-
-export const AppDataSource = new DataSource({
-  type: 'postgres',
-  url: process.env.DATABASE_URL || undefined,
-  entities: [Categoria, Produto, Recompensa, Usuario, Apoio],
-  synchronize: false,
-  logging: true,
-  ...(process.env.DATABASE_URL && {
-    ssl: true,
-    extra: {
-      ssl: {
-        rejectUnauthorized: false
-      }
-    }
-  })
-});
+console.log('=== DATABASE CONFIG ===');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
 
 // Use  a URL apenas quando em produção
-/* const config = process.env.DATABASE_URL
+const config = process.env.DATABASE_URL 
   ? {
       type: 'postgres' as const,
       url: process.env.DATABASE_URL,
@@ -54,4 +39,4 @@ export const AppDataSource = new DataSource({
 
 console.log('Using config:', process.env.DATABASE_URL ? 'PRODUCTION' : 'DEVELOPMENT');
 
-export const AppDataSource = new DataSource(config);*/
+export const AppDataSource = new DataSource(config);

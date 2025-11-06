@@ -6,7 +6,7 @@ class ProdutoRepository {
         this.Produtos = [];
         this.CounterId = 1;
     }
-    adicionar(produto) {
+    adicionar(produto, imagemFilename) {
         const newProduto = {
             id: this.CounterId++,
             nome: produto.nome,
@@ -15,28 +15,65 @@ class ProdutoRepository {
             criador: produto.criador,
             categoria: produto.categoria,
             imagem_capa: produto.imagem_capa || '',
-            valor_arrecadad0o: produto.valor_arrecadado || 0
+            imagem_capa_filename: produto.imagem_capa_filename ?? undefined,
+            valor_arrecadado: produto.valor_arrecadado || 0,
+            updateImagePath: produto.updateImagePath // Adiciona a propriedade obrigatória
         };
+        // Se temos filename, gera a URL completa
+        if (imagemFilename) {
+            newProduto.imagem_capa = `${process.env.BASE_URL || 'http://localhost:3000'}/uploads/${imagemFilename}`;
+        }
         this.Produtos.push(newProduto);
         return newProduto;
     }
     listar() {
-        return this.Produtos;
+        // Processa cada produto para garantir que as imagens tenham URL correta
+        return this.Produtos.map(produto => {
+            if (produto.imagem_capa_filename && !produto.imagem_capa?.includes('/uploads/')) {
+                produto.imagem_capa = `${process.env.BASE_URL || 'http://localhost:3000'}/uploads/${produto.imagem_capa_filename}`;
+            }
+            return produto;
+        });
     }
     buscarporId(id) {
-        return this.Produtos.find(pro => pro.id === id);
+        const produto = this.Produtos.find(pro => pro.id === id);
+        if (produto && produto.imagem_capa_filename && !produto.imagem_capa?.includes('/uploads/')) {
+            produto.imagem_capa = `${process.env.BASE_URL || 'http://localhost:3000'}/uploads/${produto.imagem_capa_filename}`;
+        }
+        return produto;
+    }
+    buscarporCriador(nomeCriador) {
+        const produtos = this.Produtos.filter(pro => pro.criador === nomeCriador);
+        return produtos.map(produto => {
+            if (produto.imagem_capa_filename && !produto.imagem_capa?.includes('/uploads/')) {
+                produto.imagem_capa = `${process.env.BASE_URL || 'http://localhost:3000'}/uploads/${produto.imagem_capa_filename}`;
+            }
+            return produto;
+        });
     }
     buscarporNome(nome) {
-        return this.Produtos.find(pro => pro.nome === nome);
+        const produto = this.Produtos.find(pro => pro.nome === nome);
+        if (produto && produto.imagem_capa_filename && !produto.imagem_capa?.includes('/uploads/')) {
+            produto.imagem_capa = `${process.env.BASE_URL || 'http://localhost:3000'}/uploads/${produto.imagem_capa_filename}`;
+        }
+        return produto;
     }
-    atualizar(id, produto) {
+    atualizar(id, produto, imagemFilename) {
         const index = this.Produtos.findIndex(pro => pro.id === id);
         if (index == -1)
             return undefined;
         const produtoAtualizado = {
             id,
-            ...produto
+            ...produto,
+            imagem_capa_filename: imagemFilename || this.Produtos[index].imagem_capa_filename
         };
+        // Atualiza a URL da imagem se temos filename
+        if (imagemFilename) {
+            produtoAtualizado.imagem_capa = `${process.env.BASE_URL || 'http://localhost:3000'}/uploads/${imagemFilename}`;
+        }
+        else if (produtoAtualizado.imagem_capa_filename && !produtoAtualizado.imagem_capa?.includes('/uploads/')) {
+            produtoAtualizado.imagem_capa = `${process.env.BASE_URL || 'http://localhost:3000'}/uploads/${produtoAtualizado.imagem_capa_filename}`;
+        }
         this.Produtos[index] = produtoAtualizado;
         return produtoAtualizado;
     }
@@ -47,6 +84,10 @@ class ProdutoRepository {
             return true;
         }
         return false;
+    }
+    // Método auxiliar para buscar por filename (útil para limpeza)
+    buscarPorFilename(filename) {
+        return this.Produtos.find(pro => pro.imagem_capa_filename === filename);
     }
 }
 exports.ProdutoRepository = ProdutoRepository;

@@ -13,7 +13,6 @@ exports.Apoio = void 0;
 const typeorm_1 = require("typeorm");
 const usuario_1 = require("./usuario");
 const produto_1 = require("./produto");
-const recompensa_1 = require("./recompensa");
 let Apoio = class Apoio {
 };
 exports.Apoio = Apoio;
@@ -46,10 +45,6 @@ __decorate([
     __metadata("design:type", Number)
 ], Apoio.prototype, "produtoId", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", Object)
-], Apoio.prototype, "recompensaId", void 0);
-__decorate([
     (0, typeorm_1.ManyToOne)(() => usuario_1.Usuario, { eager: false }),
     (0, typeorm_1.JoinColumn)({ name: "apoiadorId" }),
     __metadata("design:type", usuario_1.Usuario)
@@ -57,13 +52,11 @@ __decorate([
 __decorate([
     (0, typeorm_1.ManyToOne)(() => produto_1.Produto, { eager: false }),
     (0, typeorm_1.JoinColumn)({ name: "produtoId" }),
-    __metadata("design:type", produto_1.Produto)
+    __metadata("design:type", produto_1.Produto
+    //@ManyToOne(() => Recompensa, { eager: false, nullable: true })
+    //@JoinColumn({ name: "recompensaId" })
+    )
 ], Apoio.prototype, "produto", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(() => recompensa_1.Recompensa, { eager: false, nullable: true }),
-    (0, typeorm_1.JoinColumn)({ name: "recompensaId" }),
-    __metadata("design:type", recompensa_1.Recompensa)
-], Apoio.prototype, "recompensa", void 0);
 exports.Apoio = Apoio = __decorate([
     (0, typeorm_1.Entity)()
 ], Apoio);

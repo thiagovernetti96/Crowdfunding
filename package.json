@@ -8,8 +8,8 @@
     "test:Repository": "jest src/Testes/RepositoryTestes",
     "test:Service": "jest src/Testes/ServiceTestes",
     "test:Controller": "jest src/Testes/ControllerTestes",
-    "start": "node dist/app.js",
-    "build": "echo '🔨 Iniciando build...' && tsc && echo '✅ TypeScript compilado' && ls -la dist/ && echo '📁 Conteúdo da dist:' && find dist/ -name '*.js' | head -10"
+    "start": "node test-app.js",
+    "build": "tsc && echo '📄 Primeiras linhas do app.js:' && head -20 dist/app.js"
   },
   "author": "",
   "license": "ISC",

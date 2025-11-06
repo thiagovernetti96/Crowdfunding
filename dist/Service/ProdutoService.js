@@ -1,67 +1,157 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProdutoService = void 0;
+const ProdutoRepository_1 = require("../Repository/ProdutoRepository");
 class ProdutoService {
     constructor(produtoRepository) {
         this.produtoRepository = produtoRepository;
+        this.produtoCustomRepository = new ProdutoRepository_1.ProdutoRepository();
     }
-    async inserir(produto) {
-        if (!produto.nome || !produto.descricao || !produto.categoria || !produto.criador
-            || !produto.valor_meta) {
-            throw ({ id: 400, msg: "Nome,descrição,categoria,criador e valor meta são obrigatórios" });
+    async inserir(produto, imagemFilename) {
+        try {
+            // Validações
+            if (!produto.nome || !produto.descricao || !produto.categoria || !produto.criador || !produto.valor_meta) {
+                throw {
+                    id: 400,
+                    msg: "Nome, descrição, categoria, criador e valor meta são obrigatórios"
+                };
+            }
+            // Se foi enviado um arquivo, atualiza o filename
+            if (imagemFilename) {
+                produto.imagem_capa_filename = imagemFilename;
+                produto.imagem_capa = undefined; // Limpa o campo antigo se existir
+            }
+            // Usa o TypeORM Repository para salvar no banco
+            const novoProduto = await this.produtoRepository.save(produto);
+            return novoProduto;
         }
-        else {
-            return await this.produtoRepository.save(produto);
+        catch (error) {
+            console.error("Erro ao inserir produto:", error);
+            throw {
+                id: 500,
+                msg: "Erro interno ao salvar produto",
+                detalhes: error.message || error
+            };
         }
     }
-    async getProductsWithTotalArrecadado() {
-        const query = `
-      SELECT 
-        p.*,
-        COALESCE(SUM(a.valor), 0) as valorArrecadado,
-      FROM product p
-      LEFT JOIN apoio a ON a."productId" = p.id
-      GROUP BY p.id
-    `;
-        return await this.produtoRepository.query(query);
+    async atualizar(id, produto, imagemFilename) {
+        try {
+            // Busca produto existente
+            const produtoExistente = await this.produtoRepository.findOne({ where: { id } });
+            if (!produtoExistente) {
+                throw { id: 404, msg: "Produto não encontrado" };
+            }
+            // Atualiza campos
+            produtoExistente.nome = produto.nome;
+            produtoExistente.descricao = produto.descricao;
+            produtoExistente.valor_meta = produto.valor_meta;
+            produtoExistente.categoria = produto.categoria;
+            produtoExistente.criador = produto.criador;
+            // Se foi enviada uma nova imagem, atualiza
+            if (imagemFilename) {
+                produtoExistente.imagem_capa_filename = imagemFilename;
+                produtoExistente.imagem_capa = undefined; // Limpa campo antigo
+            }
+            // Salva no banco usando TypeORM
+            const produtoAtualizado = await this.produtoRepository.save(produtoExistente);
+            return produtoAtualizado;
+        }
+        catch (error) {
+            console.error("Erro ao atualizar produto:", error);
+            throw {
+                id: 500,
+                msg: "Erro interno ao atualizar produto",
+                detalhes: error.message || error
+            };
+        }
     }
     async listar() {
-        return this.produtoRepository.find();
+        return await this.produtoRepository.find({
+            relations: ["categoria", "criador"]
+        });
     }
     async buscarporId(id) {
-        let produto = await this.produtoRepository.findOne({ where: { id } });
+        const produto = await this.produtoRepository.findOne({
+            where: { id },
+            relations: ["categoria", "criador"]
+        });
         if (!produto) {
-            throw ({ id: 404, msg: "Produto não encontrado" });
+            throw { id: 404, msg: "Produto não encontrado" };
         }
         return produto;
+    }
+    async buscarPorCriador(nomeCriador) {
+        return await this.produtoRepository.find({
+            where: { criador: { nome: nomeCriador } },
+            relations: ["criador", "categoria"]
+        });
     }
     async buscarporNome(nome) {
-        let produto = await this.produtoRepository.findOne({ where: { nome } });
+        const produto = await this.produtoRepository.findOne({
+            where: { nome },
+            relations: ["categoria", "criador"]
+        });
         if (!produto) {
-            throw ({ id: 404, msg: "Produto não encontrado" });
+            throw { id: 404, msg: "Produto não encontrado" };
         }
         return produto;
     }
-    async atualizar(id, produto) {
-        let produtoexistente = await this.produtoRepository.findOne({ where: { id } });
-        if (!produtoexistente) {
-            throw ({ id: 404, msg: "Produto não encontrado" });
-        }
-        else {
-            produtoexistente.categoria = produto.categoria;
-            produtoexistente.criador = produto.criador;
-            produtoexistente.descricao = produto.descricao;
-            produtoexistente.nome = produto.nome;
-            produtoexistente.valor_meta = produto.valor_meta;
-        }
-        return await this.produtoRepository.save(produtoexistente);
-    }
     async deletar(id) {
-        let produto = await this.produtoRepository.findOne({ where: { id } });
+        const produto = await this.produtoRepository.findOne({ where: { id } });
         if (!produto) {
-            throw ({ id: 404, msg: "Produto não encontrado" });
+            throw { id: 404, msg: "Produto não encontrado" };
         }
         await this.produtoRepository.remove(produto);
+    }
+    // Método auxiliar para buscar produtos com valor arrecadado
+    async getProductsWithTotalArrecadado() {
+        const query = `
+    SELECT 
+      p.*,
+      COALESCE(SUM(a.valor), 0) as valor_arrecadado,
+      u.nome as criador_nome,
+      c.nome as categoria_nome
+    FROM produto p
+    LEFT JOIN apoio a ON a."produtoId" = p.id AND a.status = 'PAID'
+    LEFT JOIN usuario u ON p."criadorId" = u.id
+    LEFT JOIN categoria c ON p."categoriaId" = c.id
+    GROUP BY p.id, u.nome, c.nome
+    ORDER BY p.id
+  `;
+        return await this.produtoRepository.query(query);
+    }
+    async getProductWithTotalArrecadadoById(id) {
+        const query = `
+    SELECT 
+      p.*,
+      COALESCE(SUM(a.valor), 0) as valor_arrecadado,
+      u.nome as criador_nome,
+      c.nome as categoria_nome
+    FROM produto p
+    LEFT JOIN apoio a ON a."produtoId" = p.id AND a.status = 'PAID'
+    LEFT JOIN usuario u ON p."criadorId" = u.id
+    LEFT JOIN categoria c ON p."categoriaId" = c.id
+    WHERE p.id = $1
+    GROUP BY p.id, u.nome, c.nome
+  `;
+        const result = await this.produtoRepository.query(query, [id]);
+        return result[0] || null;
+    }
+    // src/services/ProdutoService.ts - método corrigido
+    async getProductsByCreatorWithTotalArrecadado(criadorNome) {
+        const query = `
+    SELECT 
+      p.*,
+      COALESCE(SUM(a.valor), 0) as valor_arrecadado,
+      u.nome as criador_nome
+    FROM produto p
+    LEFT JOIN apoio a ON a."produtoId" = p.id AND a.status = 'PAID'
+    INNER JOIN usuario u ON p."criadorId" = u.id
+    WHERE u.nome = $1
+    GROUP BY p.id, u.nome
+    ORDER BY p.id
+  `;
+        return await this.produtoRepository.query(query, [criadorNome]);
     }
 }
 exports.ProdutoService = ProdutoService;

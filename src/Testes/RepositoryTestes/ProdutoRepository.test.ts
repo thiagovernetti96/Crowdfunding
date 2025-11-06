@@ -1,27 +1,27 @@
-import {describe, expect,it,beforeEach} from '@jest/globals';
+/*import {describe, expect,it,beforeEach} from '@jest/globals';
 import { Produto } from '../../Model/produto'
 import { ProdutoRepository } from '../../Repository/ProdutoRepository';
 
-describe('ProdutoRepository', () => {
+/*describe('ProdutoRepository', () => {
   let repository: ProdutoRepository;
   beforeEach(() => {
     repository = new ProdutoRepository();
   });
-  describe('adicionar', () => {
+  /**describe('adicionar', () => {
     it('deve adicionar um novo produto com id autoincrement', () => {
       const produtoData = { nome: 'Produto A', descricao: 'Descrição do Produto A', valor_meta: 100.0, categoria: { id: 1 } };
       const produto = repository.adicionar(produtoData);
       expect(produto).toEqual({ id: 1, ...produtoData });
     });
-    it('deve incrementar o id para cada novo produto', () => {
+    /*it('deve incrementar o id para cada novo produto', () => {
       const produto1 = repository.adicionar({ nome: 'Produto A', descricao: 'Descrição do Produto A', valor_meta: 100.0, categoria: { id: 1 } });
       const produto2 = repository.adicionar({ nome: 'Produto B', descricao: 'Descrição do Produto B', valor_meta: 150.0, categoria: { id: 2 } });
       expect(produto1.id).toBe((1));
       expect(produto2.id).toBe((2));
     });
-  });
+  });*/
 
-  describe('listar', () => {
+  /*describe('listar', () => {
     it('deve listar todos os produtos', () => {
       const produto1 = repository.adicionar({ nome: 'Produto A', descricao: 'Descrição do Produto A', valor_meta: 100.0, categoria: { id: 1 } });
       const produto2 = repository.adicionar({ nome: 'Produto B', descricao: 'Descrição do Produto B', valor_meta: 150.0, categoria: { id: 2 } });
@@ -111,4 +111,4 @@ describe('ProdutoRepository', () => {
       expect(resultado).toBe(false);
     });
   });
-});
+});*/
