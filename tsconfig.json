@@ -6,6 +6,8 @@
       "rootDir": "./src",
       "strict": true,
       "esModuleInterop": true,
+      "moduleResolution": "node",
+      "allowSyntheticDefaultImports": true,
       "skipLibCheck": true,
       "forceConsistentCasingInFileNames": true,
       "emitDecoratorMetadata": true,

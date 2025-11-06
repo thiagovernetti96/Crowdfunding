@@ -1,6 +1,6 @@
 import { ProdutoService } from "../Service/ProdutoService";
 import { Request, Response } from "express";
-import upload from "../Config/multer";
+import upload from "../Config/multer.config";
 
 export class ProdutoController { 
   private produtoService: ProdutoService;

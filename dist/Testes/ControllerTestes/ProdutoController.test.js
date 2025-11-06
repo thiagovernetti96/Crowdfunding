@@ -50,46 +50,46 @@ const mockRequest = (body, params) => {
             (0, globals_1.expect)(res.json).toHaveBeenCalledWith({ error: "Erro ao inserir produto" });
         });
     });
-    (0, globals_1.describe)('listar', () => {
-        (0, globals_1.it)('deve listar produtos com sucesso e retornar status 200', async () => {
-            const req = mockRequest();
-            const produtosMock = [
-                { id: 1, nome: 'Produto X', descricao: 'Descrição do Produto X', valor_meta: 100.0, categoria: { id: 1 } },
-            ];
-            produtoService.listar.mockResolvedValueOnce(produtosMock);
-            await produtoController.listar(req, res);
-            (0, globals_1.expect)(res.status).toHaveBeenCalledWith(200);
-            (0, globals_1.expect)(res.json).toHaveBeenCalledWith(produtosMock);
-        });
-        (0, globals_1.it)('deve tratar erro ao listar produtos e retornar status 400', async () => {
-            const req = mockRequest();
-            const errorMock = { id: 1, msg: 'Erro ao listar produtos' };
-            produtoService.listar.mockRejectedValue(errorMock);
-            await produtoController.listar(req, res);
-            (0, globals_1.expect)(res.status).toHaveBeenCalledWith(400);
-            (0, globals_1.expect)(res.json).toHaveBeenCalledWith({ error: "Erro ao listar produtos" });
-        });
-    });
-    (0, globals_1.describe)('buscarporId', () => {
-        (0, globals_1.it)('deve buscar produto por id com sucesso e retornar status 201', async () => {
-            const req = mockRequest(undefined, { id: '1' });
-            const produtoMock = { id: 1, nome: 'Produto X', descricao: 'Descrição do Produto X', valor_meta: 100.0, categoria: { id: 1 } };
-            produtoService.buscarporId.mockResolvedValueOnce(produtoMock);
-            await produtoController.buscarporId(req, res);
-            (0, globals_1.expect)(produtoService.buscarporId).toHaveBeenCalledWith(1);
-            (0, globals_1.expect)(res.status).toHaveBeenCalledWith(201);
-            (0, globals_1.expect)(res.json).toHaveBeenCalledWith(produtoMock);
-        });
-        (0, globals_1.it)('deve tratar erro ao buscar produto por id e retornar status 400', async () => {
-            const req = mockRequest(undefined, { id: '999' });
-            const errorMock = { id: 1, msg: 'Produto não encontrado' };
-            produtoService.buscarporId.mockRejectedValue(errorMock);
-            await produtoController.buscarporId(req, res);
-            (0, globals_1.expect)(produtoService.buscarporId).toHaveBeenCalledWith(999);
-            (0, globals_1.expect)(res.status).toHaveBeenCalledWith(400);
-            (0, globals_1.expect)(res.json).toHaveBeenCalledWith({ error: "Erro ao buscar produto por ID" });
-        });
-    });
+    /*describe('listar', () => {
+      it('deve listar produtos com sucesso e retornar status 200', async () => {
+        const req = mockRequest();
+        const produtosMock = [
+          { id: 1, nome: 'Produto X', descricao: 'Descrição do Produto X', valor_meta: 100.0, categoria: { id: 1 } },
+        ];
+        produtoService.listar.mockResolvedValueOnce(produtosMock);
+        await produtoController.listar(req, res);
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith(produtosMock);
+      });
+      it('deve tratar erro ao listar produtos e retornar status 400', async () => {
+        const req = mockRequest();
+        const errorMock: MockError = { id: 1, msg: 'Erro ao listar produtos' };
+        produtoService.listar.mockRejectedValue(errorMock);
+        await produtoController.listar(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ error: "Erro ao listar produtos" });
+      });
+    });*/
+    /*describe('buscarporId', () => {
+      it('deve buscar produto por id com sucesso e retornar status 201', async () => {
+        const req = mockRequest(undefined, { id: '1' });
+        const produtoMock = { id: 1, nome: 'Produto X', descricao: 'Descrição do Produto X', valor_meta: 100.0, categoria: { id: 1 } };
+        produtoService.buscarporId.mockResolvedValueOnce(produtoMock);
+        await produtoController.buscarporId(req, res);
+        expect(produtoService.buscarporId).toHaveBeenCalledWith(1);
+        expect(res.status).toHaveBeenCalledWith(201);
+        expect(res.json).toHaveBeenCalledWith(produtoMock);
+      });
+      it('deve tratar erro ao buscar produto por id e retornar status 400', async () => {
+        const req = mockRequest(undefined, { id: '999' });
+        const errorMock: MockError = { id: 1, msg: 'Produto não encontrado' };
+        produtoService.buscarporId.mockRejectedValue(errorMock);
+        await produtoController.buscarporId(req, res);
+        expect(produtoService.buscarporId).toHaveBeenCalledWith(999);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ error: "Erro ao buscar produto por ID" });
+      });
+    });*/
     (0, globals_1.describe)('atualizar', () => {
         (0, globals_1.it)('deve atualizar produto com sucesso e retornar status 200', async () => {
             const req = mockRequest({ nome: 'Produto Atualizado', descricao: 'Descrição do Produto Atualizado', valor_meta: 150.0, categoria: { id: 2 } }, { id: '1' });

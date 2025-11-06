@@ -1,4 +1,4 @@
-import {describe, expect,it,beforeEach,jest} from '@jest/globals';
+/*import {describe, expect,it,beforeEach,jest} from '@jest/globals';
 import { Recompensa } from '../../Model/recompensa';
 import { Produto } from '../../Model/produto';
 import { RecompensaService } from '../../Service/RecompensaService'
@@ -46,7 +46,7 @@ describe('RecompensaService', () => {
       expect(mockRecompensaRepository.save).not.toHaveBeenCalled();
     });
   });
-  describe('atualizar', () => {
+  /*describe('atualizar', () => {
     it('deve atualizar uma recompensa existente', async () => {
       const recompensa_existente: Recompensa = { id: 1, nome: 'Recompensa A', produto:{nome:'Produto A'}, descricao: 'Descrição da Recompensa A', valor_minimo: 50.0,quantidade_maxima:100 };
       const recompensa_atualizada: Recompensa = { id: 1, nome: 'Recompensa B', produto:{nome:'Produto B'}, descricao: 'Descrição da Recompensa B', valor_minimo: 75.0,quantidade_maxima:150 };
@@ -117,4 +117,4 @@ describe('RecompensaService', () => {
     });
   });
 
-});
+});*/

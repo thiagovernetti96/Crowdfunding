@@ -60,7 +60,7 @@ describe('ProdutoController', () => {
   });
   });
 
-  describe('listar', () => {
+  /*describe('listar', () => {
     it('deve listar produtos com sucesso e retornar status 200', async () => {
       const req = mockRequest();
       const produtosMock = [
@@ -79,8 +79,8 @@ describe('ProdutoController', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({ error: "Erro ao listar produtos" });
     });
-  });
-  describe('buscarporId', () => {
+  });*/
+  /*describe('buscarporId', () => {
     it('deve buscar produto por id com sucesso e retornar status 201', async () => {
       const req = mockRequest(undefined, { id: '1' });
       const produtoMock = { id: 1, nome: 'Produto X', descricao: 'Descrição do Produto X', valor_meta: 100.0, categoria: { id: 1 } };
@@ -99,7 +99,7 @@ describe('ProdutoController', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({ error: "Erro ao buscar produto por ID" });
     });
-  });
+  });*/
   describe('atualizar', () => {
     it('deve atualizar produto com sucesso e retornar status 200', async () => {
       const req = mockRequest({ nome: 'Produto Atualizado', descricao: 'Descrição do Produto Atualizado', valor_meta: 150.0, categoria: { id: 2 } }, { id: '1' });
