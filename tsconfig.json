@@ -1,18 +1,19 @@
 {
-    "compilerOptions": {
-      "target": "es2020",
-      "module": "commonjs",
-      "outDir": "./dist",
-      "rootDir": "./src",
-      "strict": true,
-      "esModuleInterop": true,
-      "moduleResolution": "node",
-      "allowSyntheticDefaultImports": true,
-      "skipLibCheck": true,
-      "forceConsistentCasingInFileNames": true,
-      "emitDecoratorMetadata": true,
-      "experimentalDecorators": true
-    },
-    "include": ["src/**/*","dist/**/*"],
-    "exclude": ["node_modules"]
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "types": ["node"]
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"]
 }

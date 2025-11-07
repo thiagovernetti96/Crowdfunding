@@ -1,4 +1,4 @@
-import express,{Request,Response} from "express";
+import express,{Request,Response} from "express"; 
 import path from 'path';
 import 'dotenv/config';
 import { Usuario } from "./Model/usuario";
@@ -80,7 +80,7 @@ AppDataSource.initialize().then(async () => {
   app.use('/api/categoria', CategoriaRouter(categoriaController));
   app.use('/api/produto', ProdutoRouter(produtoController));
   app.use('/api/recompensa', RecompensaRouter(recompensaController));
-  app.post('/api/login', (req, res) => loginController.realizarLogin(req, res));
+  app.post('/api/login', (req:Request, res:Response) => loginController.realizarLogin(req, res));
   // Adicionando isso temporariamente
   //app.get('/api/test-api-key', (req, res) => {
   //console.log("🔍 Todas as variáveis de ambiente:", process.env);
