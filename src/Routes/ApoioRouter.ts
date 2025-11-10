@@ -1,4 +1,4 @@
-import {Router} from "express"
+import {Router,Request,Response} from "express"
 import { ApoioController } from "../Controller/ApoioController"
 import { TokenMiddleware } from "../Middleware/TokenMiddleware";
 
@@ -9,10 +9,10 @@ export const ApoioRouter = (
   const router = Router();
   
   // Aplica o middleware apenas nas rotas que precisam de autenticação
-  router.post('/',  (req, res) => controller.criar(req,res));
-  router.get('/:id/status',(req, res) => controller.status(req, res));
-  router.post("/:id/simular", (req, res) => controller.simularPagamento(req, res));
-  
+  router.post('/',  (req: Request, res: Response) => controller.criar(req,res));
+  router.get('/:id/status',(req: Request, res: Response) => controller.status(req, res));
+  router.post("/:id/simular", (req: Request, res: Response) => controller.simularPagamento(req, res));
+
   // Webhook não precisa de autenticação
   router.post("/webhook/pix", (req, res) => controller.webhook(req, res));
 
