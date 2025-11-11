@@ -23,7 +23,10 @@ const config = process.env.DATABASE_URL
         ssl: {
           rejectUnauthorized: false
         }
-      }
+      },
+       migrations: ["src/migrations/*.ts"],
+       migrationsTableName: "migrations",
+       migrationsRun: true
     }
   : {
       type: 'postgres' as const,
