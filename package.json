@@ -9,7 +9,8 @@
     "test:Service": "jest src/Testes/ServiceTestes",
     "test:Controller": "jest src/Testes/ControllerTestes",
     "start": "node dist/app.js",
-    "build": "npm install && tsc"
+    "build": "npm install && tsc",
+    "seed": "ts-node src/seed.ts"
   },
   "author": "",
   "license": "ISC",
