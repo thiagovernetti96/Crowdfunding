@@ -91,76 +91,7 @@ AppDataSource.initialize().then(async () => {
     //allEnvKeys: Object.keys(process.env).filter(key => key.includes('ABACATE') || key.includes('API'))
   //});
 //});
-app.post('/api/admin/create-tables', async (req, res) => {
-  try {
-    console.log('🛠️ Criando tabelas manualmente...');
-    
-    // Cria tabela categoria
-    await AppDataSource.query(`
-      CREATE TABLE IF NOT EXISTS categoria (
-        id SERIAL PRIMARY KEY,
-        nome VARCHAR(255) NOT NULL UNIQUE
-      )
-    `);
-    
-    // Cria tabela usuario
-    await AppDataSource.query(`
-      CREATE TABLE IF NOT EXISTS usuario (
-        id SERIAL PRIMARY KEY,
-        nome VARCHAR(255) NOT NULL,
-        email VARCHAR(255) NOT NULL UNIQUE,
-        senha VARCHAR(255) NOT NULL,
-        tipo VARCHAR(50) DEFAULT 'usuario'
-      )
-    `);
 
-    // Cria tabela produto
-    await AppDataSource.query(`
-      CREATE TABLE IF NOT EXISTS produto (
-        id SERIAL PRIMARY KEY,
-        nome VARCHAR(255) NOT NULL,
-        descricao TEXT,
-        valor_meta DECIMAL(10,2),
-        imagem_capa VARCHAR(500),
-        imagem_capa_filename VARCHAR(500),
-        categoria_id INTEGER REFERENCES categoria(id),
-        criador_id INTEGER REFERENCES usuario(id),
-        created_at TIMESTAMP DEFAULT NOW()
-      )
-    `);
-
-    // Cria tabela recompensa
-    await AppDataSource.query(`
-      CREATE TABLE IF NOT EXISTS recompensa (
-        id SERIAL PRIMARY KEY,
-        nome VARCHAR(255) NOT NULL,
-        descricao TEXT,
-        valor_minimo DECIMAL(10,2),
-        produto_id INTEGER REFERENCES produto(id)
-      )
-    `);
-
-    // Cria tabela apoio
-    await AppDataSource.query(`
-      CREATE TABLE IF NOT EXISTS apoio (
-        id SERIAL PRIMARY KEY,
-        valor DECIMAL(10,2) NOT NULL,
-        pix_id VARCHAR(255),
-        status VARCHAR(50) DEFAULT 'PENDING',
-        data_apoio TIMESTAMP DEFAULT NOW(),
-        apoiador_id INTEGER REFERENCES usuario(id),
-        produto_id INTEGER REFERENCES produto(id)
-      )
-    `);
-
-    console.log('✅ Todas as tabelas criadas!');
-    res.json({ message: 'Tabelas criadas com sucesso!' });
-    
-  } catch (error) {
-    console.log('❌ Erro ao criar tabelas:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
   // Rotas PROTEGIDAS
   app.use('/api/apoio', ApoioRouter(apoioController, tokenMiddleware));
 

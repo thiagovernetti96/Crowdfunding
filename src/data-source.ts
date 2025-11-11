@@ -18,8 +18,8 @@ const config = process.env.DATABASE_URL
       entities: [Categoria, Produto, Recompensa, Usuario, Apoio], 
       migrations: [__dirname + '/../migrations/*.js'], // Migrations compiladas para JS
       migrationsTableName: "migrations",
-      migrationsRun: true,
-      synchronize: false,
+      migrationsRun: false,
+      synchronize: true,
       logging: true,
       ssl: true,
       extra: {
