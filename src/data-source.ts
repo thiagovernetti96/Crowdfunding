@@ -1,4 +1,4 @@
-// data-source.ts
+
 import { DataSource } from 'typeorm';
 import { Categoria } from './Model/categoria';
 import { Produto } from './Model/produto';
@@ -10,12 +10,15 @@ console.log('=== DATABASE CONFIG ===');
 console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
 
-// Use  a URL apenas quando em produção
+// Use a URL apenas quando em produção
 const config = process.env.DATABASE_URL 
   ? {
       type: 'postgres' as const,
       url: process.env.DATABASE_URL,
-      entities: [Categoria, Produto, Recompensa, Usuario, Apoio],
+      entities: [Categoria, Produto, Recompensa, Usuario, Apoio], 
+      migrations: [__dirname + '/../migrations/*.js'], // Migrations compiladas para JS
+      migrationsTableName: "migrations",
+      migrationsRun: true,
       synchronize: false,
       logging: true,
       ssl: true,
@@ -23,10 +26,7 @@ const config = process.env.DATABASE_URL
         ssl: {
           rejectUnauthorized: false
         }
-      },
-       migrations: ["src/migrations/*.ts"],
-       migrationsTableName: "migrations",
-       migrationsRun: true
+      }
     }
   : {
       type: 'postgres' as const,
@@ -37,7 +37,10 @@ const config = process.env.DATABASE_URL
       database: 'crowdfunding',
       synchronize: true,
       logging: true,
-      entities: [Categoria, Produto, Recompensa, Usuario, Apoio]
+      entities: [Categoria, Produto, Recompensa, Usuario, Apoio], // MESMAS ENTITIES
+      migrations: ["src/migrations/*.ts"], // Em desenvolvimento usa TS
+      migrationsTableName: "migrations",
+      migrationsRun: false
     };
 
 console.log('Using config:', process.env.DATABASE_URL ? 'PRODUCTION' : 'DEVELOPMENT');
