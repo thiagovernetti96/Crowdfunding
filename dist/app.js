@@ -37,7 +37,6 @@ console.log('🔍 DATABASE_URL no app.ts:', process.env.DATABASE_URL ? 'PRESENTE
 console.log('🔍 NODE_ENV no app.ts:', process.env.NODE_ENV);
 data_source_1.AppDataSource.initialize().then(async () => {
     const app = (0, express_1.default)();
-    app.use(express_1.default.json());
     const cors = require('cors');
     app.use(cors({
         origin: '*',

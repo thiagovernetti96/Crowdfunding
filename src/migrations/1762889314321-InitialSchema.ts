@@ -4,12 +4,15 @@ export class InitialSchema1700000000000 implements MigrationInterface {
     name = 'InitialSchema1700000000000'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
+        // Tabela categoria
         await queryRunner.query(`
             CREATE TABLE IF NOT EXISTS categoria (
                 id SERIAL PRIMARY KEY,
                 nome VARCHAR(255) NOT NULL UNIQUE
             )
         `);
+
+        // Tabela usuario
         await queryRunner.query(`
             CREATE TABLE IF NOT EXISTS usuario (
                 id SERIAL PRIMARY KEY,
@@ -20,20 +23,22 @@ export class InitialSchema1700000000000 implements MigrationInterface {
             )
         `);
 
+        //Tabela Produto
         await queryRunner.query(`
             CREATE TABLE IF NOT EXISTS produto (
                 id SERIAL PRIMARY KEY,
-                titulo VARCHAR(255) NOT NULL,
+                nome VARCHAR(255) NOT NULL,
                 descricao TEXT,
-                meta_arrecadacao DECIMAL(10,2),
-                data_limite TIMESTAMP,
+                valor_meta DECIMAL(10,2),
                 imagem_capa VARCHAR(500),
+                imagem_capa_filename VARCHAR(500),
                 categoria_id INTEGER REFERENCES categoria(id),
-                usuario_id INTEGER REFERENCES usuario(id),
+                criador_id INTEGER REFERENCES usuario(id),
                 created_at TIMESTAMP DEFAULT NOW()
             )
         `);
 
+        //Tabela Recompensa
         await queryRunner.query(`
             CREATE TABLE IF NOT EXISTS recompensa (
                 id SERIAL PRIMARY KEY,
@@ -44,14 +49,17 @@ export class InitialSchema1700000000000 implements MigrationInterface {
             )
         `);
 
+        // Tabela apoio
         await queryRunner.query(`
             CREATE TABLE IF NOT EXISTS apoio (
                 id SERIAL PRIMARY KEY,
                 valor DECIMAL(10,2) NOT NULL,
+                pix_id VARCHAR(255),
+                status VARCHAR(50) DEFAULT 'PENDING',
                 data_apoio TIMESTAMP DEFAULT NOW(),
-                usuario_id INTEGER REFERENCES usuario(id),
-                produto_id INTEGER REFERENCES produto(id),
-                recompensa_id INTEGER REFERENCES recompensa(id)
+                apoiador_id INTEGER REFERENCES usuario(id),
+                produto_id INTEGER REFERENCES produto(id)
+                -- recompensa_id é opcional
             )
         `);
     }
