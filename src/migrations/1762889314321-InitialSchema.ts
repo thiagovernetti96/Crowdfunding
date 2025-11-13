@@ -8,7 +8,7 @@ export class InitialSchema1700000000000 implements MigrationInterface {
         await queryRunner.query(`
             CREATE TABLE IF NOT EXISTS categoria (
                 id SERIAL PRIMARY KEY,
-                nome VARCHAR(255) NOT NULL UNIQUE
+                nome VARCHAR(255) NOT NULL 
             )
         `);
 

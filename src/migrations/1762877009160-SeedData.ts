@@ -1,28 +1,36 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class SeedInitialData1234567890 implements MigrationInterface {
+export class SeedInitialData1700000000001 implements MigrationInterface {
+    name = 'SeedInitialData1700000000001'
+
     public async up(queryRunner: QueryRunner): Promise<void> {
-        // Insere categorias
+        // Insere categorias apenas se não existirem
         await queryRunner.query(`
-            INSERT INTO categoria (nome) VALUES 
-            ('Tecnologia'),
-            ('Arte'),
-            ('Limpeza'),
-            ('Musica'),
-            ('Esportes')
-            ON CONFLICT (nome) DO NOTHING;
+            INSERT INTO categoria (nome) 
+            SELECT 'Tecnologia' WHERE NOT EXISTS (SELECT 1 FROM categoria WHERE nome = 'Tecnologia')
+        `);
+        await queryRunner.query(`
+            INSERT INTO categoria (nome) 
+            SELECT 'Arte' WHERE NOT EXISTS (SELECT 1 FROM categoria WHERE nome = 'Arte')
+        `);
+        await queryRunner.query(`
+            INSERT INTO categoria (nome) 
+            SELECT 'Limpeza' WHERE NOT EXISTS (SELECT 1 FROM categoria WHERE nome = 'Limpeza')
+        `);
+        await queryRunner.query(`
+            INSERT INTO categoria (nome) 
+            SELECT 'Musica' WHERE NOT EXISTS (SELECT 1 FROM categoria WHERE nome = 'Musica')
+        `);
+        await queryRunner.query(`
+            INSERT INTO categoria (nome) 
+            SELECT 'Esportes' WHERE NOT EXISTS (SELECT 1 FROM categoria WHERE nome = 'Esportes')
         `);
         
-        //Insere um usuário admin se necessário
-        await queryRunner.query(`
-            INSERT INTO usuario (nome, email, senha, tipo) VALUES 
-            ('Admin', 'admin@email.com', 'senha_criptografada', 'admin')
-            ON CONFLICT (email) DO NOTHING;
-        `);
+
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`DELETE FROM categoria WHERE nome IN ('Tecnologia', 'Arte', 'Limpeza', 'Musica', 'Esportes')`);
-        await queryRunner.query(`DELETE FROM usuario WHERE email = 'admin@email.com'`);
+        
     }
 }
