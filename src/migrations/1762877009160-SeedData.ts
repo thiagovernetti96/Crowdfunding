@@ -13,7 +13,7 @@ export class SeedInitialData1234567890 implements MigrationInterface {
             ON CONFLICT (nome) DO NOTHING;
         `);
         
-        // Ou insere um usuário admin se necessário
+        //Insere um usuário admin se necessário
         await queryRunner.query(`
             INSERT INTO usuario (nome, email, senha, tipo) VALUES 
             ('Admin', 'admin@email.com', 'senha_criptografada', 'admin')
@@ -22,7 +22,7 @@ export class SeedInitialData1234567890 implements MigrationInterface {
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`DELETE FROM categoria WHERE nome IN ('Tecnologia', 'Arte', 'Games', 'Musica', 'Filmes')`);
+        await queryRunner.query(`DELETE FROM categoria WHERE nome IN ('Tecnologia', 'Arte', 'Limpeza', 'Musica', 'Esportes')`);
         await queryRunner.query(`DELETE FROM usuario WHERE email = 'admin@email.com'`);
     }
 }

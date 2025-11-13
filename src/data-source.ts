@@ -18,8 +18,8 @@ const config = process.env.DATABASE_URL
       entities: [Categoria, Produto, Recompensa, Usuario, Apoio], 
       migrations: [__dirname + '/../migrations/*.js'], // Migrations compiladas para JS
       migrationsTableName: "migrations",
-      migrationsRun: false,
-      synchronize: true,
+      migrationsRun: true,
+      synchronize: false,
       logging: true,
       ssl: true,
       extra: {
@@ -37,7 +37,7 @@ const config = process.env.DATABASE_URL
       database: 'crowdfunding',
       synchronize: true,
       logging: true,
-      entities: [Categoria, Produto, Recompensa, Usuario, Apoio], // MESMAS ENTITIES
+      entities: [Categoria, Produto, Recompensa, Usuario, Apoio],
       migrations: ["src/migrations/*.ts"], // Em desenvolvimento usa TS
       migrationsTableName: "migrations",
       migrationsRun: false

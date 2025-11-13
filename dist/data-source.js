@@ -37,9 +37,9 @@ const config = process.env.DATABASE_URL
         database: 'crowdfunding',
         synchronize: true,
         logging: true,
-        entities: [categoria_1.Categoria, produto_1.Produto, recompensa_1.Recompensa, usuario_1.Usuario, apoio_1.Apoio], // MESMAS ENTITIES
-        migrations: ["src/migrations/*.ts"], // Em desenvolvimento usa TS
-        migrationsTableName: "migrations",
+        entities: [categoria_1.Categoria, produto_1.Produto, recompensa_1.Recompensa, usuario_1.Usuario, apoio_1.Apoio],
+        /*migrations: ["src/migrations/*.ts"], // Em desenvolvimento usa TS
+        migrationsTableName: "migrations",*/
         migrationsRun: false
     };
 console.log('Using config:', process.env.DATABASE_URL ? 'PRODUCTION' : 'DEVELOPMENT');

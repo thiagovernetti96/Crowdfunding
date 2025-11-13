@@ -89,6 +89,42 @@ data_source_1.AppDataSource.initialize().then(async () => {
     //});
     // Rotas PROTEGIDAS
     app.use('/api/apoio', (0, ApoioRouter_1.ApoioRouter)(apoioController, tokenMiddleware));
+    //Ver status das migrations
+    app.get('/api/debug/migrations-status', async (req, res) => {
+        try {
+            // Verifica se a tabela migrations existe
+            const migrationsTableExists = await data_source_1.AppDataSource.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'migrations'
+      )
+    `);
+            let migrations = [];
+            if (migrationsTableExists[0].exists) {
+                migrations = await data_source_1.AppDataSource.query('SELECT * FROM migrations ORDER BY id DESC');
+            }
+            // Lista todas as tabelas
+            const tables = await data_source_1.AppDataSource.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public'
+      ORDER BY table_name
+    `);
+            res.json({
+                migrationsTableExists: migrationsTableExists[0].exists,
+                migrations: migrations,
+                tables: tables.map(t => t.table_name),
+                config: {
+                    migrationsRun: data_source_1.AppDataSource.options.migrationsRun,
+                    synchronize: data_source_1.AppDataSource.options.synchronize
+                }
+            });
+        }
+        catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
     app.listen(PORT, '0.0.0.0', () => {
         console.log(`Servidor rodando em http://localhost:${PORT}`);
     });
