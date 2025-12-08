@@ -9,13 +9,13 @@ export const ApoioRouter = (
   const router = Router();
   
   // Aplica o middleware apenas nas rotas que precisam de autenticação
-  router.post('/',  (req: Request, res: Response) => controller.criar(req,res));
-  router.get('/:id/status',(req: Request, res: Response) => controller.status(req, res));
-  router.post("/:id/simular", (req: Request, res: Response) => controller.simularPagamento(req, res));
+  router.post('/apoio',  (req: Request, res: Response) => controller.criar(req,res));
+  router.get('/apoio/:id/status',(req: Request, res: Response) => controller.status(req, res));
+  router.post("/apoio/:id/simular", (req: Request, res: Response) => controller.simularPagamento(req, res));
   router.post('/apoio/webhook',(req:Request,res:Response)=>controller.webhook(req,res))
 
   // Webhook não precisa de autenticação
-  router.post("/webhook/pix", (req, res) => controller.webhook(req, res));
+  //router.post("/webhook/pix", (req, res) => controller.webhook(req, res));
 
   
   
