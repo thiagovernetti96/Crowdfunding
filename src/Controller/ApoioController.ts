@@ -1,4 +1,3 @@
-// src/controllers/ApoioController.ts - ADICIONE ESTE MÉTODO
 import { Request, Response } from "express";
 import { ApoioService } from "../Service/ApoioService";
 

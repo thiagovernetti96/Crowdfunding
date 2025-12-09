@@ -151,11 +151,8 @@ export class ApoioService {
       console.log("📡 QR Code ID:", apoio.pixId);
       
       // ENDPOINT CORRETO: /pixQrCode/check
-      const statusResponse = await axios.post(
+      const statusResponse = await axios.get(
         `${ABACATE_PAY_BASE_URL}/pixQrCode/check`,
-        {
-          id: apoio.pixId  // Envia o ID no body
-        },
         {
           headers: {
             "Authorization": `Bearer ${ABACATE_PAY_API_KEY}`,
