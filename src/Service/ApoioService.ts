@@ -33,7 +33,7 @@ export class ApoioService {
    try {
     console.log("🔗 Criando QR Code PIX no Abacate Pay...");
     
-    // ✅ BUSCA DADOS DO USUÁRIO USANDO AppDataSource
+    //  BUSCA DADOS DO USUÁRIO USANDO AppDataSource
     const usuarioRepository = AppDataSource.getRepository(Usuario);
     const usuario = await usuarioRepository.findOneBy({ id: data.apoiador });
     
@@ -48,18 +48,17 @@ export class ApoioService {
     
     console.log("👤 Usuário encontrado:", { id: usuario.id, nome: usuario.nome, email: usuario.email });
     
-    // ✅ VERIFICA CAMPOS DISPONÍVEIS (para debug)
+    //  VERIFICA CAMPOS DISPONÍVEIS (para debug)
     console.log("🔍 Campos do usuário:", Object.keys(usuario));
     console.log("📋 Dados completos:", usuario);
     
     const CPF_PADRAO_PARA_TESTES = "865.555.880-04";
-    // ✅ DEFINE CPF (com fallback para padrão)
+    //  DEFINE CPF (com fallback para padrão)
     let taxId =  CPF_PADRAO_PARA_TESTES;
     
-    // Log para ver qual CPF está sendo usado
-    console.log(`📋 CPF que será enviado: ${taxId} ${taxId === CPF_PADRAO_PARA_TESTES ? '(PADRÃO)' : '(DO USUÁRIO)'}`);
+    console.log(` CPF que será enviado: ${taxId} ${taxId === CPF_PADRAO_PARA_TESTES ? '(PADRÃO)' : '(DO USUÁRIO)'}`);
     
-    // ✅ CORRIGINDO O BODY DA REQUISIÇÃO
+  
     const createQRCodeResponse = await axios.post(
       `${ABACATE_PAY_BASE_URL}/pixQrCode/create`,
       {
@@ -145,69 +144,46 @@ export class ApoioService {
   }
 }
 
-  static async simularPagamento(apoioId: number) {
+ static async simularPagamento(apoioId: number) {
+  try {
     const apoio = await ApoioRepository.findOneBy({ id: apoioId });
-    if (!apoio || !apoio.pixId) {
-      throw new Error("Apoio não encontrado ou sem Pix vinculado");
+    if (!apoio || !apoio.pixId || apoio.pixId.startsWith('temp_')) {
+      throw new Error("Apoio não encontrado ou sem Pix válido");
     }
 
-    //  VERIFICA se não é um ID temporário
-    if (apoio.pixId.startsWith('temp_')) {
-      throw new Error("QR Code PIX ainda não foi gerado completamente");
-    }
-
-    try {
-      console.log("🔗 Simulando pagamento no Abacate Pay...");
-      console.log("📡 QR Code ID:", apoio.pixId);
-      
-      //  ENDPOINT PARA SIMULAÇÃO 
-      const simulateResponse = await axios.post(
-        `${ABACATE_PAY_BASE_URL}/pixQrCode/simulate`,
-        {
-          id: apoio.pixId
+    console.log("🎮 Simulando pagamento para:", apoio.pixId);
+    
+    const simulateResponse = await axios.post(
+      `${ABACATE_PAY_BASE_URL}/pixQrCode/simulate-payment`,
+      {
+        id: apoio.pixId  // ID do PIX a simular
+      },
+      {
+        headers: {
+          "Authorization": `Bearer ${ABACATE_PAY_API_KEY}`,
+          "Content-Type": "application/json",
         },
-        {
-          headers: {
-            "Authorization": `Bearer ${ABACATE_PAY_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          timeout: 10000,
-        }
-      );
-
-      const simulationResult = simulateResponse.data;
-      
-      console.log("✅ Resposta da simulação:", simulationResult);
-
-      // Atualiza status do apoio
-      if (simulationResult.data?.status === "PAID") {
-        apoio.status = "PAID";
-        await ApoioRepository.save(apoio);
+        timeout: 10000,
       }
+    );
 
-      return {
-        apoio,
-        simulation: simulationResult,
-      };
-    } catch (error: any) {
-      console.error(" Erro ao simular pagamento:", error.response?.data || error.message);
-      
-      // Fallback: marca como pago localmente se a API falhar
-      if (process.env.NODE_ENV !== 'production') {
-        console.log("⚠️ Modo desenvolvimento: marcando como PAID localmente");
-        apoio.status = "PAID";
-        await ApoioRepository.save(apoio);
-        
-        return {
-          apoio,
-          simulation: { data: { status: "PAID", message: "Simulado localmente" } },
-          _devMode: true
-        };
-      }
-      
-      throw new Error(`Erro ao simular pagamento: ${error.response?.data?.message || error.message}`);
-    }
+    console.log("✅ Simulação realizada:", simulateResponse.data);
+    
+    // Atualiza status
+    apoio.status = "PAID";
+    await ApoioRepository.save(apoio);
+    
+    return {
+      success: true,
+      message: "Pagamento simulado com sucesso",
+      data: simulateResponse.data
+    };
+    
+  } catch (error: any) {
+    console.error("❌ Erro ao simular pagamento:", error.response?.data || error.message);
+    throw new Error(`Falha na simulação: ${error.response?.data?.message || error.message}`);
   }
+}
 
   static async verificarStatus(apoioId: number) {
     const apoio = await ApoioRepository.findOneBy({ id: apoioId });
