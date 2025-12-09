@@ -3,69 +3,128 @@ import axios from "axios";
 import 'dotenv/config';
 import { ApoioRepository } from "../Repository/ApoioRepository";
 import { Apoio } from "../Model/apoio";
+import { Usuario } from "../Model/usuario"
+import { UsuarioService } from "./UsuarioService";
 
 const ABACATE_PAY_BASE_URL = "https://api.abacatepay.com/v1";
 const ABACATE_PAY_API_KEY = process.env.ABACATE_PAY_API_KEY!;
 
 export class ApoioService {
   
-  static async criarApoio(data: { produto: number; apoiador: number; valor: number }) {
-    const apoio = new Apoio();
-    apoio.produtoId = data.produto;
-    apoio.apoiadorId = data.apoiador;
-    apoio.valor = data.valor;
-    apoio.status = "PENDING";
-    apoio.pixId = "temp_" + Date.now();
+    private static usuarioService: UsuarioService;
 
-    const apoioSalvo = await ApoioRepository.save(apoio);
-
-    try {
-      console.log("🔗 Criando QR Code PIX no Abacate Pay...");
-      
-      const createQRCodeResponse = await axios.post(
-        `${ABACATE_PAY_BASE_URL}/pixQrCode/create`,
-        {
-          amount: data.valor,
-          description: `Apoio ao produto ${data.produto}`,
-          expiresIn: 3600,
-          merchant_city: "São Paulo",
-          merchant_name: "Crowdfunding App",
-        },
-        {
-          headers: {
-            "Authorization": `Bearer ${ABACATE_PAY_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          timeout: 15000,
-        }
-      );
-
-      console.log("✅ Resposta da API:", createQRCodeResponse.data);
-
-      const qrCodeData = createQRCodeResponse.data;
-
-      
-      apoioSalvo.pixId = qrCodeData.id || qrCodeData.data?.id;
-      apoioSalvo.status = qrCodeData.status || "CREATED";
-      const apoioAtualizado = await ApoioRepository.save(apoioSalvo);
-
-      return {
-        apoio: apoioAtualizado,
-        pix: {
-          id: qrCodeData.id || qrCodeData.data?.id,
-          valor: data.valor,
-          brCode: qrCodeData.brCode || qrCodeData.data?.brCode,
-          brCodeBase64: qrCodeData.brCodeBase64 || qrCodeData.data?.brCodeBase64,
-          expires_at: qrCodeData.expiresAt || qrCodeData.data?.expiresAt,
-          raw: qrCodeData 
-        },
-      };
-    } catch (error: any) {
-      console.error("❌ Erro ao criar QR Code PIX:", error.response?.data || error.message);
-      await ApoioRepository.remove(apoioSalvo);
-      throw new Error(`Erro ao criar PIX: ${error.response?.data?.message || error.message}`);
-    }
+  static setUsuarioService(service: UsuarioService) {
+    this.usuarioService = service;
   }
+
+ static async criarApoio(data: { produto: number; apoiador: number; valor: number }) {
+  const apoio = new Apoio();
+  apoio.produtoId = data.produto;
+  apoio.apoiadorId = data.apoiador;
+  apoio.valor = data.valor;
+  apoio.status = "PENDING";
+  apoio.pixId = "temp_" + Date.now();
+
+  const apoioSalvo = await ApoioRepository.save(apoio);
+
+  try {
+    console.log("🔗 Criando QR Code PIX no Abacate Pay...");
+    
+    //  BUSCA DADOS DO USUÁRIO
+    let usuario;
+    try {
+      usuario = await this.usuarioService.buscarporId(data.apoiador);
+      console.log("👤 Usuário encontrado:", usuario?.nome);
+    } catch (error) {
+      console.warn("⚠️ Usuário não encontrado, usando dados padrão");
+      usuario = null;
+    }
+    
+    // ✅ CORRIGINDO O BODY DA REQUISIÇÃO
+    const createQRCodeResponse = await axios.post(
+      `${ABACATE_PAY_BASE_URL}/pixQrCode/create`,
+      {
+        amount: data.valor,
+        expiresIn: 3600, // 1 hora em segundos
+        description: `Apoio ao produto ${data.produto}`,
+        customer: {  
+          name: usuario?.nome || "Cliente",
+          email: usuario?.email || "cliente@email.com",
+          cellphone: usuario?.telefone || usuario?.celular || "(11) 99999-9999",
+          taxId: usuario?.cpf || usuario?.documento || "000.000.000-00"
+        },
+        metadata: {  
+          externalId: `apoio_${apoioSalvo.id}`,
+          apoioId: apoioSalvo.id.toString(),
+          produtoId: data.produto.toString(),
+          userId: data.apoiador.toString()
+        }
+      },
+      {
+        headers: {
+          "Authorization": `Bearer ${ABACATE_PAY_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        timeout: 15000,
+      }
+    );
+
+    console.log("✅ Resposta da API:", createQRCodeResponse.data);
+
+    const qrCodeData = createQRCodeResponse.data;
+    const pixInfo = qrCodeData.data; 
+    
+    if (!pixInfo) {
+      throw new Error("Resposta da API não contém dados do PIX");
+    }
+    
+    apoioSalvo.pixId = pixInfo.id; // "pix_char_..."
+    apoioSalvo.status = pixInfo.status; // "PENDING"
+    
+    
+    const apoioAtualizado = await ApoioRepository.save(apoioSalvo);
+
+    // ✅ VERIFICA SE TEM QR CODE BASE64
+    if (!pixInfo.brCodeBase64 && pixInfo.brCode) {
+      console.log("⚠️ API não retornou brCodeBase64, apenas brCode");
+      // Se quiser, pode gerar QR Code localmente aqui
+    }
+
+    // ✅ RETORNO CORRETO
+    return {
+      apoio: {
+        id: apoioAtualizado.id,
+        valor: apoioAtualizado.valor,
+        status: apoioAtualizado.status,
+        pixId: apoioAtualizado.pixId,
+        produtoId: apoioAtualizado.produtoId,
+        apoiadorId: apoioAtualizado.apoiadorId,
+        dataApoio: apoioAtualizado.data_apoio
+      },
+      pix: {
+        id: pixInfo.id,
+        amount: pixInfo.amount,
+        status: pixInfo.status,
+        brCode: pixInfo.brCode, // Código PIX em texto
+        brCodeBase64: pixInfo.brCodeBase64, // Imagem em base64 (pode ser null)
+        expiresAt: pixInfo.expiresAt,
+        createdAt: pixInfo.createdAt,
+        devMode: pixInfo.devMode || false
+      },
+      success: true
+    };
+    
+  } catch (error: any) {
+    console.error("❌ Erro ao criar QR Code PIX:", error.response?.data || error.message);
+    
+    // Marca como falha em vez de remover (melhor para debug)
+    apoioSalvo.status = "FAILED";
+    apoioSalvo.pixId = "error_" + Date.now();
+    await ApoioRepository.save(apoioSalvo);
+    
+    throw new Error(`Erro ao criar PIX: ${error.response?.data?.message || error.message}`);
+  }
+}
 
   static async simularPagamento(apoioId: number) {
     const apoio = await ApoioRepository.findOneBy({ id: apoioId });
