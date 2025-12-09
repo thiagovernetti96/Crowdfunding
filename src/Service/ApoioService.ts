@@ -5,6 +5,7 @@ import { ApoioRepository } from "../Repository/ApoioRepository";
 import { Apoio } from "../Model/apoio";
 import { Usuario } from "../Model/usuario"
 import { UsuarioService } from "./UsuarioService";
+import { AppDataSource } from "../data-source";
 
 const ABACATE_PAY_BASE_URL = "https://api.abacatepay.com/v1";
 const ABACATE_PAY_API_KEY = process.env.ABACATE_PAY_API_KEY!;
@@ -17,6 +18,8 @@ export class ApoioService {
     this.usuarioService = service;
   }
 
+  
+
  static async criarApoio(data: { produto: number; apoiador: number; valor: number }) {
   const apoio = new Apoio();
   apoio.produtoId = data.produto;
@@ -27,33 +30,49 @@ export class ApoioService {
 
   const apoioSalvo = await ApoioRepository.save(apoio);
 
-  try {
+   try {
     console.log("🔗 Criando QR Code PIX no Abacate Pay...");
     
-    //  BUSCA DADOS DO USUÁRIO
-    let usuario;
-    try {
-      usuario = await this.usuarioService.buscarporId(data.apoiador);
-      console.log("👤 Usuário encontrado:", usuario?.nome);
-    } catch (error) {
-      console.warn("⚠️ Usuário não encontrado, usando dados padrão");
-      usuario = null;
+    // ✅ BUSCA DADOS DO USUÁRIO USANDO AppDataSource
+    const usuarioRepository = AppDataSource.getRepository(Usuario);
+    const usuario = await usuarioRepository.findOneBy({ id: data.apoiador });
+    
+    if (!usuario) {
+      console.error("❌ Usuário não encontrado com ID:", data.apoiador);
+      // Log todos os usuários para debug
+      const todosUsuarios = await usuarioRepository.find();
+      console.log("📋 Usuários no banco:", todosUsuarios.map(u => ({ id: u.id, nome: u.nome })));
+      
+      throw new Error(`Usuário com ID ${data.apoiador} não encontrado`);
     }
+    
+    console.log("👤 Usuário encontrado:", { id: usuario.id, nome: usuario.nome, email: usuario.email });
+    
+    // ✅ VERIFICA CAMPOS DISPONÍVEIS (para debug)
+    console.log("🔍 Campos do usuário:", Object.keys(usuario));
+    console.log("📋 Dados completos:", usuario);
+    
+    const CPF_PADRAO_PARA_TESTES = "865.555.880-04";
+    // ✅ DEFINE CPF (com fallback para padrão)
+    let taxId =  CPF_PADRAO_PARA_TESTES;
+    
+    // Log para ver qual CPF está sendo usado
+    console.log(`📋 CPF que será enviado: ${taxId} ${taxId === CPF_PADRAO_PARA_TESTES ? '(PADRÃO)' : '(DO USUÁRIO)'}`);
     
     // ✅ CORRIGINDO O BODY DA REQUISIÇÃO
     const createQRCodeResponse = await axios.post(
       `${ABACATE_PAY_BASE_URL}/pixQrCode/create`,
       {
         amount: data.valor,
-        expiresIn: 3600, // 1 hora em segundos
+        expiresIn: 86400, // 24 horas
         description: `Apoio ao produto ${data.produto}`,
-        customer: {  
-          name: usuario?.nome || "Cliente",
-          email: usuario?.email || "cliente@email.com",
-          cellphone: usuario?.telefone || usuario?.celular || "(11) 99999-9999",
-          taxId: usuario?.cpf || usuario?.documento || "000.000.000-00"
+        customer: {
+          name: usuario.nome || "Cliente",
+          email: usuario.email || "sem-email@exemplo.com",
+          cellphone: "(11) 99999-9999",
+          taxId: taxId 
         },
-        metadata: {  
+        metadata: {
           externalId: `apoio_${apoioSalvo.id}`,
           apoioId: apoioSalvo.id.toString(),
           produtoId: data.produto.toString(),
@@ -69,6 +88,7 @@ export class ApoioService {
       }
     );
 
+
     console.log("✅ Resposta da API:", createQRCodeResponse.data);
 
     const qrCodeData = createQRCodeResponse.data;
@@ -78,19 +98,18 @@ export class ApoioService {
       throw new Error("Resposta da API não contém dados do PIX");
     }
     
-    apoioSalvo.pixId = pixInfo.id; // "pix_char_..."
-    apoioSalvo.status = pixInfo.status; // "PENDING"
+    apoioSalvo.pixId = pixInfo.id;
+    apoioSalvo.status = pixInfo.status;
     
     
     const apoioAtualizado = await ApoioRepository.save(apoioSalvo);
 
-    // ✅ VERIFICA SE TEM QR CODE BASE64
+    // VERIFICA SE TEM QR CODE BASE64
     if (!pixInfo.brCodeBase64 && pixInfo.brCode) {
       console.log("⚠️ API não retornou brCodeBase64, apenas brCode");
-      // Se quiser, pode gerar QR Code localmente aqui
     }
 
-    // ✅ RETORNO CORRETO
+    //  RETORNO CORRETO
     return {
       apoio: {
         id: apoioAtualizado.id,
@@ -115,7 +134,7 @@ export class ApoioService {
     };
     
   } catch (error: any) {
-    console.error("❌ Erro ao criar QR Code PIX:", error.response?.data || error.message);
+    console.error(" Erro ao criar QR Code PIX:", error.response?.data || error.message);
     
     // Marca como falha em vez de remover (melhor para debug)
     apoioSalvo.status = "FAILED";
@@ -132,7 +151,7 @@ export class ApoioService {
       throw new Error("Apoio não encontrado ou sem Pix vinculado");
     }
 
-    // ✅ VERIFICA se não é um ID temporário
+    //  VERIFICA se não é um ID temporário
     if (apoio.pixId.startsWith('temp_')) {
       throw new Error("QR Code PIX ainda não foi gerado completamente");
     }
@@ -141,7 +160,7 @@ export class ApoioService {
       console.log("🔗 Simulando pagamento no Abacate Pay...");
       console.log("📡 QR Code ID:", apoio.pixId);
       
-      //  ENDPOINT CORRETO PARA SIMULAÇÃO 
+      //  ENDPOINT PARA SIMULAÇÃO 
       const simulateResponse = await axios.post(
         `${ABACATE_PAY_BASE_URL}/pixQrCode/simulate`,
         {
@@ -171,7 +190,7 @@ export class ApoioService {
         simulation: simulationResult,
       };
     } catch (error: any) {
-      console.error("❌ Erro ao simular pagamento:", error.response?.data || error.message);
+      console.error(" Erro ao simular pagamento:", error.response?.data || error.message);
       
       // Fallback: marca como pago localmente se a API falhar
       if (process.env.NODE_ENV !== 'production') {
@@ -196,7 +215,7 @@ export class ApoioService {
       throw new Error("Apoio não encontrado ou sem Pix vinculado");
     }
 
-    // ✅ VERIFICA se não é um ID temporário
+    // VERIFICA se não é um ID temporário
     if (apoio.pixId.startsWith('temp_')) {
       return {
         apoio,
@@ -243,7 +262,7 @@ export class ApoioService {
         lastChecked: new Date().toISOString()
       };
     } catch (error: any) {
-      console.error("❌ Erro ao verificar status:", error.response?.data || error.message);
+      console.error(" Erro ao verificar status:", error.response?.data || error.message);
       
       // Se der 404, tenta endpoint antigo como fallback
       if (error.response?.status === 404) {
@@ -300,7 +319,7 @@ export class ApoioService {
         source: "alternativo"
       };
     } catch (error) {
-      console.error("❌ Endpoint alternativo também falhou:", error);
+      console.error(" Endpoint alternativo também falhou:", error);
       // Retorna status baseado no que temos no banco
       return {
         apoio,
@@ -319,7 +338,7 @@ export class ApoioService {
       const qrcode_id = webhookData.qrcode_id || webhookData.data?.id || webhookData.id;
       const status = (webhookData.status || webhookData.data?.status || "UNKNOWN").toUpperCase();
       
-      console.log("📊 Dados extraídos:", { qrcode_id, status });
+      console.log("Dados extraídos:", { qrcode_id, status });
       
       if (!qrcode_id) {
         throw new Error("ID do QR Code não encontrado no webhook");
@@ -344,7 +363,7 @@ export class ApoioService {
       console.warn("⚠️ Apoio não encontrado para o QR Code ID:", qrcode_id);
       return { success: false, error: "Apoio não encontrado" };
     } catch (error: any) {
-      console.error("❌ Erro ao processar webhook:", error);
+      console.error(" Erro ao processar webhook:", error);
       throw error;
     }
   }
@@ -399,7 +418,7 @@ export class ApoioService {
       };
       
     } catch (error: any) {
-      console.error("❌ Teste falhou:", error.response?.data || error.message);
+      console.error(" Teste falhou:", error.response?.data || error.message);
       
       return {
         success: false,
