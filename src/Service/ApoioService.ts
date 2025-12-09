@@ -153,11 +153,10 @@ export class ApoioService {
 
     console.log("🎮 Simulando pagamento para:", apoio.pixId);
     
+    // ✅ CORREÇÃO: Use GET com query parameter (não POST com body)
     const simulateResponse = await axios.post(
-      `${ABACATE_PAY_BASE_URL}/pixQrCode/simulate-payment`,
-      {
-        id: apoio.pixId  // ID do PIX a simular
-      },
+      `${ABACATE_PAY_BASE_URL}/pixQrCode/simulate-payment?id=${apoio.pixId}`, // ← id na query string
+      {}, // Body vazio
       {
         headers: {
           "Authorization": `Bearer ${ABACATE_PAY_API_KEY}`,
