@@ -153,7 +153,9 @@ export class ApoioService {
       // ENDPOINT CORRETO: /pixQrCode/check
       const statusResponse = await axios.get(
         `${ABACATE_PAY_BASE_URL}/pixQrCode/check`,
-        {
+        {params:{
+          id:apoio.pixId
+        },
           headers: {
             "Authorization": `Bearer ${ABACATE_PAY_API_KEY}`,
             "Content-Type": "application/json",
