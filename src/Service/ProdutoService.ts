@@ -117,34 +117,61 @@ export class ProdutoService {
   }
 
   async buscarporCategoria(nomeCategoria: string): Promise<Produto[]> {
-  // Busca produtos com join de apoio em uma única query
-  const produtosComApoio = await this.produtoRepository
-    .createQueryBuilder('produto')
-    .leftJoinAndSelect('produto.categoria', 'categoria')
-    .leftJoinAndSelect('produto.criador', 'criador')
-    .leftJoin('produto.apoios', 'apoio', 'apoio.status = :status', { 
-      status: 'PAID' 
-    })
-    .addSelect('COALESCE(SUM(apoio.valor), 0)', 'valor_arrecadado')
-    .where('categoria.nome ILIKE :categoria', { categoria: nomeCategoria })
-    .groupBy('produto.id, categoria.id, criador.id')
-    .getRawAndEntities();
-  
-  // Mapeia os resultados
-  const produtosComArrecadacao = produtosComApoio.entities.map((produto, index) => {
-    const raw = produtosComApoio.raw[index];
+  try {
+    if (!nomeCategoria) {
+      return [];
+    }
     
-    // Cria nova instância
-    const produtoInstancia = new Produto();
-    Object.assign(produtoInstancia, produto);
+    // Usando QueryBuilder com subquery para arrecadação
+    const queryBuilder = this.produtoRepository
+      .createQueryBuilder('produto')
+      .leftJoinAndSelect('produto.categoria', 'categoria')
+      .leftJoinAndSelect('produto.criador', 'criador')
+      .where('categoria.nome ILIKE :categoria', { categoria: `%${nomeCategoria}%` });
     
-    // Adiciona arrecadação
-    produtoInstancia.valor_arrecadado = parseFloat(raw.valor_arrecadado || '0');
+    // Adiciona subquery para calcular arrecadação
+    queryBuilder
+      .addSelect((subQuery) => {
+        return subQuery
+          .select('COALESCE(SUM(apoio.valor), 0)', 'valor_arrecadado')
+          .from('apoio', 'apoio')
+          .where('apoio."produtoId" = produto.id')
+          .andWhere('apoio.status = :status', { status: 'PAID' });
+      }, 'valor_arrecadado');
     
-    return produtoInstancia;
-  });
-  
-  return produtosComArrecadacao;
+    const resultados = await queryBuilder.getRawAndEntities();
+    
+    console.log(`Resultados raw:`, resultados.raw);
+    console.log(`Resultados entities:`, resultados.entities);
+    
+    // Combina as entidades com os dados raw
+    const produtosComArrecadacao = resultados.entities.map((produto, index) => {
+      const raw = resultados.raw[index];
+      
+      const produtoInstancia = new Produto();
+      
+      // Copia propriedades básicas
+      produtoInstancia.id = produto.id;
+      produtoInstancia.nome = produto.nome;
+      produtoInstancia.descricao = produto.descricao;
+      produtoInstancia.valor_meta = produto.valor_meta;
+      produtoInstancia.imagem_capa = produto.imagem_capa;
+      produtoInstancia.imagem_capa_filename = produto.imagem_capa_filename;
+      produtoInstancia.categoria = produto.categoria;
+      produtoInstancia.criador = produto.criador;
+      
+      // Adiciona arrecadação do raw
+      produtoInstancia.valor_arrecadado = raw ? parseFloat(raw.valor_arrecadado || '0') : 0;
+      
+      return produtoInstancia;
+    });
+    
+    return produtosComArrecadacao;
+    
+  } catch (error) {
+    console.error("Erro em buscarporCategoria service:", error);
+    throw error;
+  }
 }
 
 
