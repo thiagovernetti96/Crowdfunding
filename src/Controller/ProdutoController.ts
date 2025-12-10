@@ -106,15 +106,25 @@ export class ProdutoController {
     }
   }
 
-  async buscarPorCategoria(req:Request, res:Response): Promise<void>{
-    try{
-      const nomeCategoria = req.params.nomeCategoria;
-      const busca = await this.produtoService.buscarporCategoria(nomeCategoria);
-      res.status(200).json(busca)
-    }catch (err:any){
-      res.status(err.id).json({message:err.msg})
+async buscarPorCategoria(req: Request, res: Response): Promise<void> {
+  try {
+    const nomeCategoria = req.params.nomeCategoria;
+    
+    // Validação básica
+    if (!nomeCategoria || nomeCategoria.trim() === '') {
+      res.status(400).json({ message: "Nome da categoria é obrigatório" });
+      return;
     }
+    
+    const busca = await this.produtoService.buscarporCategoria(nomeCategoria);
+    res.status(200).json(busca);
+  } catch (err: any) {
+    console.error("Erro em buscarPorCategoria:", err);
+    res.status(500).json({ 
+      message: err.message || "Erro interno ao buscar por categoria" 
+    });
   }
+}
 
   async deletar(req: Request, res: Response): Promise<void> {
     try {

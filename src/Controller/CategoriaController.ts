@@ -28,16 +28,31 @@ export class CategoriaController{
     }
   }
 
-  async buscarporId(req:Request,res:Response):Promise<void>{
-    try{
-      const id = parseInt(req.params.id)
-      const categoria = await this.categoriaService.buscarporId(id);
-      res.status(200).json(categoria)
+ async buscarporId(req: Request, res: Response): Promise<void> {
+  try {
+    const id = parseInt(req.params.id);
+    
+    // Validação do ID
+    if (isNaN(id)) {
+      res.status(400).json({ message: "ID inválido" });
+      return;
     }
-    catch(err:any){
-      res.status(err.id).json({message:err.msg})
+    
+    const categoria = await this.categoriaService.buscarporId(id);
+    
+    if (!categoria) {
+      res.status(404).json({ message: "Categoria não encontrada" });
+      return;
     }
+    
+    res.status(200).json(categoria);
+  } catch (err: any) {
+    console.error("Erro em buscarporId:", err);
+    res.status(500).json({ 
+      message: err.message || "Erro interno ao buscar categoria" 
+    });
   }
+}
 
   async buscarporNome(req:Request,res:Response):Promise<void>{
     try{
