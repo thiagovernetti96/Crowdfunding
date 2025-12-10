@@ -116,17 +116,37 @@ export class ProdutoService {
     return produto;
   }
 
-  async buscarporCategoria(nomeCategoria:string): Promise<Produto[]>{
-    return await this.produtoRepository.find({
-     where: {
-      categoria: {
-        nome: ILike(`%${nomeCategoria}%`)
-      }
-    },
-      relations:["categoria","criador"]
+  async buscarporCategoria(nomeCategoria: string): Promise<Produto[]> {
+  // Busca produtos com join de apoio em uma única query
+  const produtosComApoio = await this.produtoRepository
+    .createQueryBuilder('produto')
+    .leftJoinAndSelect('produto.categoria', 'categoria')
+    .leftJoinAndSelect('produto.criador', 'criador')
+    .leftJoin('produto.apoios', 'apoio', 'apoio.status = :status', { 
+      status: 'PAID' 
     })
+    .addSelect('COALESCE(SUM(apoio.valor), 0)', 'valor_arrecadado')
+    .where('categoria.nome ILIKE :categoria', { categoria: nomeCategoria })
+    .groupBy('produto.id, categoria.id, criador.id')
+    .getRawAndEntities();
+  
+  // Mapeia os resultados
+  const produtosComArrecadacao = produtosComApoio.entities.map((produto, index) => {
+    const raw = produtosComApoio.raw[index];
+    
+    // Cria nova instância
+    const produtoInstancia = new Produto();
+    Object.assign(produtoInstancia, produto);
+    
+    // Adiciona arrecadação
+    produtoInstancia.valor_arrecadado = parseFloat(raw.valor_arrecadado || '0');
+    
+    return produtoInstancia;
+  });
+  
+  return produtosComArrecadacao;
+}
 
-  }
 
   async deletar(id: number): Promise<void> {
     const produto = await this.produtoRepository.findOne({ where: { id } });
@@ -174,7 +194,6 @@ async getProductWithTotalArrecadadoById(id: number): Promise<any> {
   return result[0] || null;
 }
 
-// src/services/ProdutoService.ts - método corrigido
 async getProductsByCreatorWithTotalArrecadado(criadorNome: string): Promise<any[]> {
   const query = `
     SELECT 
