@@ -55,6 +55,16 @@ export class ProdutoRepository {
     });
   }
 
+  buscarporCategoria(nomecategoria:string):Produto[]{
+    const produtos = this.Produtos.filter(pro=>pro.categoria===nomecategoria);
+     return produtos.map(produto => {
+      if (produto.imagem_capa_filename && !produto.imagem_capa?.includes('/uploads/')) {
+        produto.imagem_capa = `${process.env.BASE_URL || 'http://localhost:3000'}/uploads/${produto.imagem_capa_filename}`;
+      }
+      return produto;
+    });
+  }
+
   buscarporNome(nome: string): Produto | undefined {
     const produto = this.Produtos.find(pro => pro.nome === nome);
     if (produto && produto.imagem_capa_filename && !produto.imagem_capa?.includes('/uploads/')) {

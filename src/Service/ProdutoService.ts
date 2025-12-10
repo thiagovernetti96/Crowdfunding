@@ -116,6 +116,14 @@ export class ProdutoService {
     return produto;
   }
 
+  async buscarporCategoria(nomeCategoria:string): Promise<Produto[]>{
+    return await this.produtoRepository.find({
+      where:{categoria:{nome:nomeCategoria}},
+      relations:["categoria","criador"]
+    })
+
+  }
+
   async deletar(id: number): Promise<void> {
     const produto = await this.produtoRepository.findOne({ where: { id } });
     
