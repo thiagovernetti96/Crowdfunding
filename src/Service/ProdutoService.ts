@@ -1,4 +1,4 @@
-import { Repository } from "typeorm";
+import { ILike, Repository } from "typeorm";
 import { Produto } from "../Model/produto";
 import { ProdutoRepository } from "../Repository/ProdutoRepository";
 
@@ -118,7 +118,11 @@ export class ProdutoService {
 
   async buscarporCategoria(nomeCategoria:string): Promise<Produto[]>{
     return await this.produtoRepository.find({
-      where:{categoria:{nome:nomeCategoria}},
+     where: {
+      categoria: {
+        nome: ILike(`%${nomeCategoria}%`)
+      }
+    },
       relations:["categoria","criador"]
     })
 

@@ -46,7 +46,7 @@ export class ProdutoRepository {
   }
 
   buscarporCriador(nomeCriador: string): Produto[] {
-    const produtos = this.Produtos.filter(pro => pro.criador === nomeCriador);
+    const produtos = this.Produtos.filter(pro => pro.criador && pro.criador.nome === nomeCriador);
     return produtos.map(produto => {
       if (produto.imagem_capa_filename && !produto.imagem_capa?.includes('/uploads/')) {
         produto.imagem_capa = `${process.env.BASE_URL || 'http://localhost:3000'}/uploads/${produto.imagem_capa_filename}`;
@@ -56,7 +56,7 @@ export class ProdutoRepository {
   }
 
   buscarporCategoria(nomecategoria:string):Produto[]{
-    const produtos = this.Produtos.filter(pro=>pro.categoria===nomecategoria);
+    const produtos = this.Produtos.filter(pro=>pro.categoria && pro.categoria.nome ===nomecategoria);
      return produtos.map(produto => {
       if (produto.imagem_capa_filename && !produto.imagem_capa?.includes('/uploads/')) {
         produto.imagem_capa = `${process.env.BASE_URL || 'http://localhost:3000'}/uploads/${produto.imagem_capa_filename}`;
