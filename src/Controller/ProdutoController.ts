@@ -138,7 +138,7 @@ async buscarPorCategoria(req: Request, res: Response): Promise<void> {
 
    async listarComArrecadacao(req: Request, res: Response) {
     try {
-      const produtos = await this.produtoService.getProductsWithTotalArrecadado();
+      const produtos = await this.produtoService.listarComArrecadacao();
       res.json(produtos);
     } catch (error) {
       res.status(500).json({ error: 'Erro ao buscar produtos' });

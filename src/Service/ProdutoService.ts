@@ -185,22 +185,30 @@ export class ProdutoService {
     await this.produtoRepository.remove(produto);
   }
 
-  // Método auxiliar para buscar produtos com valor arrecadado
-  async getProductsWithTotalArrecadado(): Promise<any[]> {
-  const query = `
-    SELECT 
-      p.*,
-      COALESCE(SUM(a.valor), 0) as valor_arrecadado,
-      u.nome as criador_nome,
-      c.nome as categoria_nome
-    FROM produto p
-    LEFT JOIN apoio a ON a."produtoId" = p.id AND a.status = 'PAID'
-    LEFT JOIN usuario u ON p."criadorId" = u.id
-    LEFT JOIN categoria c ON p."categoriaId" = c.id
-    GROUP BY p.id, u.nome, c.nome
-    ORDER BY p.id
-  `;  
-  return await this.produtoRepository.query(query);
+async listarComArrecadacao(): Promise<Produto[]> {
+  const queryBuilder = this.produtoRepository
+    .createQueryBuilder('produto')
+    .leftJoinAndSelect('produto.categoria', 'categoria')
+    .leftJoinAndSelect('produto.criador', 'criador')
+    .leftJoin('apoio', 'apoio', 'apoio."produtoId" = produto.id AND apoio.status = :status', { 
+      status: 'PAID' 
+    })
+    .addSelect('COALESCE(SUM(apoio.valor), 0)', 'valor_arrecadado')
+    .groupBy('produto.id, categoria.id, criador.id');
+  
+  const resultados = await queryBuilder.getRawAndEntities();
+  
+  return resultados.entities.map((produto, index) => {
+    const raw = resultados.raw[index];
+    
+    const produtoInstancia = new Produto();
+    Object.assign(produtoInstancia, produto);
+    
+    // Adiciona arrecadação
+    produtoInstancia.valor_arrecadado = raw ? parseFloat(raw.valor_arrecadado || '0') : 0;
+    
+    return produtoInstancia;
+  });
 }
 
 async getProductWithTotalArrecadadoById(id: number): Promise<any> {
