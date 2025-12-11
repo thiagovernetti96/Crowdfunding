@@ -159,7 +159,11 @@ export class ProdutoService {
       produtoInstancia.imagem_capa_filename = produto.imagem_capa_filename;
       produtoInstancia.categoria = produto.categoria;
       produtoInstancia.criador = produto.criador;
-      
+       
+    if (produtoInstancia.imagem_capa_filename && !produtoInstancia.imagem_capa?.includes('/uploads/')) {
+      const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+      produtoInstancia.imagem_capa = `${baseUrl}/uploads/${produtoInstancia.imagem_capa_filename}`;
+    }
       // Adiciona arrecadação do raw
       produtoInstancia.valor_arrecadado = raw ? parseFloat(raw.valor_arrecadado || '0') : 0;
       
@@ -204,6 +208,11 @@ async listarComArrecadacao(): Promise<Produto[]> {
     const produtoInstancia = new Produto();
     Object.assign(produtoInstancia, produto);
     
+     if (produtoInstancia.imagem_capa_filename && !produtoInstancia.imagem_capa?.includes('/uploads/')) {
+      const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+      produtoInstancia.imagem_capa = `${baseUrl}/uploads/${produtoInstancia.imagem_capa_filename}`;
+    }
+
     // Adiciona arrecadação
     produtoInstancia.valor_arrecadado = raw ? parseFloat(raw.valor_arrecadado || '0') : 0;
     
