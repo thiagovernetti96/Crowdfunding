@@ -190,34 +190,40 @@ export class ProdutoService {
   }
 
 async listarComArrecadacao(): Promise<Produto[]> {
-  const queryBuilder = this.produtoRepository
-    .createQueryBuilder('produto')
-    .leftJoinAndSelect('produto.categoria', 'categoria')
-    .leftJoinAndSelect('produto.criador', 'criador')
-    .leftJoin('apoio', 'apoio', 'apoio."produtoId" = produto.id AND apoio.status = :status', { 
-      status: 'PAID' 
-    })
-    .addSelect('COALESCE(SUM(apoio.valor), 0)', 'valor_arrecadado')
-    .groupBy('produto.id, categoria.id, criador.id');
-  
-  const resultados = await queryBuilder.getRawAndEntities();
-  
-  return resultados.entities.map((produto, index) => {
-    const raw = resultados.raw[index];
-    
-    const produtoInstancia = new Produto();
-    Object.assign(produtoInstancia, produto);
-    
-     if (produtoInstancia.imagem_capa_filename && !produtoInstancia.imagem_capa?.includes('/uploads/')) {
-      const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-      produtoInstancia.imagem_capa = `${baseUrl}/uploads/${produtoInstancia.imagem_capa_filename}`;
-    }
-
-    // Adiciona arrecadação
-    produtoInstancia.valor_arrecadado = raw ? parseFloat(raw.valor_arrecadado || '0') : 0;
-    
-    return produtoInstancia;
+  const produtos = await this.produtoRepository.find({
+    relations: ["categoria", "criador"]
   });
+
+  const produtosComArrecadacao = await Promise.all(
+    produtos.map(async (produto) => {
+      const resultado = await this.produtoRepository
+        .createQueryBuilder('produto')
+        .leftJoin('apoio', 'apoio', 'apoio."produtoId" = produto.id AND apoio.status = :status', { 
+          status: 'PAID' 
+        })
+        .select('COALESCE(SUM(apoio.valor), 0)', 'total')
+        .where('produto.id = :id', { id: produto.id })
+        .getRawOne();
+      
+      const valorArrecadado = parseFloat(resultado?.total || '0');
+    
+      const produtoInstancia = new Produto();
+      Object.assign(produtoInstancia, produto);
+      
+      // Força o updateImagePath se não foi chamado
+      if (produtoInstancia.imagem_capa_filename && 
+          !produtoInstancia.imagem_capa?.includes('/uploads/')) {
+        const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+        produtoInstancia.imagem_capa = `${baseUrl}/uploads/${produtoInstancia.imagem_capa_filename}`;
+      }
+      
+      produtoInstancia.valor_arrecadado = valorArrecadado;
+      
+      return produtoInstancia;
+    })
+  );
+  
+  return produtosComArrecadacao;
 }
 
 async getProductWithTotalArrecadadoById(id: number): Promise<any> {
