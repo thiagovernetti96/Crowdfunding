@@ -74,7 +74,7 @@ AppDataSource.initialize().then(async () => {
     //Midleware TokenMiddleware
     const tokenMiddleware = new TokenMiddleware(loginService)
   // Rotas PÚBLICAS 
-  app.use('/uploads', express.static(path.join(__dirname, '../uploads')));    
+  app.use('/uploads', express.static('uploads'));    
   app.use('/api/usuario', UsuarioRouter(usuarioController));
   app.use('/api/categoria', CategoriaRouter(categoriaController));
   app.use('/api/produto', ProdutoRouter(produtoController));
